@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch hẹn của tôi{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Lịch hẹn của tôi</h2>
+    
+    {% if lich_hen %}
+    <table>
+        <tr>
+            {% if user.ho_so_benh_nhan %}
+            <th>Bác sĩ</th>
+            {% else %}
+            <th>Bệnh nhân</th>
+            {% endif %}
+            <th>Ngày</th>
+            <th>Giờ</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+        {% for lich in lich_hen %}
+        <tr>
+            {% if user.ho_so_benh_nhan %}
+            <td>BS. {{ lich.bac_si.nguoi_dung.get_full_name }}</td>
+            {% else %}
+            <td>{{ lich.benh_nhan.nguoi_dung.get_full_name }}</td>
+            {% endif %}
+            <td>{{ lich.ngay }}</td>
+            <td>{{ lich.gio }}</td>
+            <td>{{ lich.get_trang_thai_display }}</td>
+            <td>
+                {% if lich.trang_thai == 'pending' %}
+                    {% if user.ho_so_bac_si %}
+                    <a href="{% url 'xac_nhan_lich_hen' lich.id %}" class="btn btn-success">Xác nhận</a>
+                    {% endif %}
+                    <a href="{% url 'huy_lich_hen' lich.id %}" class="btn btn-danger">Hủy</a>
+                {% elif lich.trang_thai == 'approved' and user.ho_so_bac_si %}
+                    <a href="{% url 'tao_ho_so_benh_an' lich.id %}" class="btn">Ghi hồ sơ</a>
+                {% elif lich.trang_thai == 'completed' %}
+                    <a href="{% url 'xem_ho_so_benh_an' lich.ho_so_benh_an.id %}" class="btn">Xem hồ sơ</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>Chưa có lịch hẹn nào</p>
+    {% endif %}
+</div>
+{% endblock %}

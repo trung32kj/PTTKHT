@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch sử khám bệnh{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Lịch sử khám bệnh</h2>
+    
+    {% if ho_so_list %}
+    <table>
+        <tr>
+            {% if user.ho_so_benh_nhan %}
+            <th>Bác sĩ</th>
+            {% else %}
+            <th>Bệnh nhân</th>
+            {% endif %}
+            <th>Ngày khám</th>
+            <th>Chẩn đoán</th>
+            <th>Ngày tạo</th>
+            <th>Thao tác</th>
+        </tr>
+        {% for ho_so in ho_so_list %}
+        <tr>
+            {% if user.ho_so_benh_nhan %}
+            <td>BS. {{ ho_so.lich_hen.bac_si.nguoi_dung.get_full_name }}</td>
+            {% else %}
+            <td>{{ ho_so.lich_hen.benh_nhan.nguoi_dung.get_full_name }}</td>
+            {% endif %}
+            <td>{{ ho_so.lich_hen.ngay }}</td>
+            <td>{{ ho_so.chan_doan|truncatewords:10 }}</td>
+            <td>{{ ho_so.ngay_tao|date:"d/m/Y H:i" }}</td>
+            <td>
+                <a href="{% url 'xem_ho_so_benh_an' ho_so.id %}" class="btn">Xem chi tiết</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>Chưa có hồ sơ bệnh án nào</p>
+    {% endif %}
+</div>
+{% endblock %}

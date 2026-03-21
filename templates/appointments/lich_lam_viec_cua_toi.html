@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch làm việc của tôi{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Lịch làm việc của tôi</h2>
+        <a href="{% url 'dang_ky_lich_lam_viec' %}" class="btn btn-success">+ Đăng ký lịch mới</a>
+    </div>
+    
+    {% if lich_lam_viec %}
+    <table>
+        <thead>
+            <tr>
+                <th>Ngày</th>
+                <th>Giờ</th>
+                <th>Trạng thái</th>
+                <th>Bệnh nhân đã đặt</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for llv in lich_lam_viec %}
+            <tr>
+                <td>{{ llv.ngay }}</td>
+                <td>{{ llv.gio_bat_dau }} - {{ llv.gio_ket_thuc }}</td>
+                <td>
+                    {% if llv.con_trong %}
+                    <span style="color: #27ae60; font-weight: bold;">✓ Còn trống</span>
+                    {% else %}
+                    <span style="color: #e74c3c; font-weight: bold;">✗ Đã đặt</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not llv.con_trong %}
+                        {% for lh in llv.lich_hen.all %}
+                            {% if lh.trang_thai != 'canceled' %}
+                                {{ lh.benh_nhan.nguoi_dung.get_full_name }}
+                                <small>({{ lh.get_trang_thai_display }})</small>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if llv.con_trong %}
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="lich_id" value="{{ llv.id }}">
+                        <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;" onclick="return confirm('Xóa lịch làm việc này?')">Xóa</button>
+                    </form>
+                    {% else %}
+                    <span style="color: #7f8c8d;">Không thể xóa</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
+        <p style="font-size: 1.2rem;">Chưa có lịch làm việc nào</p>
+        <p>Hãy đăng ký lịch làm việc để bệnh nhân có thể đặt lịch khám</p>
+        <a href="{% url 'dang_ky_lich_lam_viec' %}" class="btn btn-success" style="margin-top: 1rem;">Đăng ký lịch làm việc</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

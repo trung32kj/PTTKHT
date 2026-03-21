@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch làm việc{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+        <div>
+            {% if bac_si.anh_dai_dien %}
+            <img src="{{ bac_si.anh_dai_dien.url }}" alt="Ảnh bác sĩ" style="width: 150px; height: 150px; border-radius: 8px; object-fit: cover;">
+            {% else %}
+            <div style="width: 150px; height: 150px; background: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Không có ảnh</div>
+            {% endif %}
+        </div>
+        <div>
+            <h2>BS. {{ bac_si.nguoi_dung.get_full_name }}</h2>
+            <p><strong>Chuyên khoa:</strong> {{ bac_si.chuyen_khoa }}</p>
+            <p><strong>Bằng cấp:</strong> {{ bac_si.bang_cap }}</p>
+            <p><strong>Phí khám:</strong> {{ bac_si.phi_kham }} VNĐ</p>
+            <p><strong>Mô tả:</strong> {{ bac_si.mo_ta|default:"Không có" }}</p>
+        </div>
+    </div>
+    
+    {% if lich_lam_viec %}
+    <table>
+        <tr>
+            <th>Ngày</th>
+            <th>Giờ bắt đầu</th>
+            <th>Giờ kết thúc</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+        {% for lich in lich_lam_viec %}
+        <tr>
+            <td>{{ lich.ngay }}</td>
+            <td>{{ lich.gio_bat_dau }}</td>
+            <td>{{ lich.gio_ket_thuc }}</td>
+            <td>{% if lich.con_trong %}Còn trống{% else %}Đã đặt{% endif %}</td>
+            <td>
+                {% if lich.con_trong %}
+                <a href="{% url 'dat_lich_kham' lich.id %}" class="btn btn-success">Đặt lịch</a>
+                {% else %}
+                <span style="color: #999;">Đã đặt</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>Bác sĩ chưa có lịch làm việc</p>
+    {% endif %}
+    
+    <a href="{% url 'danh_sach_bac_si' %}" class="btn" style="margin-top: 1rem;">Quay lại</a>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+========================================
+   HƯỚNG DẪN CẤU HÌNH OPENAI API
+========================================
+
+AI Chatbox hiện đang hoạt động với 2 chế độ:
+
+1. CHẾĐỘ FALLBACK (Mặc định - Đang dùng)
+   - Sử dụng phân tích từ khóa thông minh
+   - Không cần API key
+   - Hoạt động nhanh và ổn định
+   - Phù hợp cho demo và test
+
+2. CHẾ ĐỘ CHATGPT (Nâng cao)
+   - Sử dụng GPT-3.5-turbo thực tế
+   - Trò chuyện tự nhiên hơn
+   - Phân tích triệu chứng chính xác hơn
+   - Cần API key từ OpenAI
+
+========================================
+CÁCH BẬT CHATGPT:
+========================================
+
+Bước 1: Lấy API Key từ OpenAI
+   - Truy cập: https://platform.openai.com/api-keys
+   - Đăng ký/Đăng nhập tài khoản
+   - Tạo API key mới
+   - Copy key (dạng: sk-...)
+
+Bước 2: Cấu hình trong Django
+   Mở file: clinic_management/settings.py
+   
+   Tìm dòng:
+   OPENAI_API_KEY = 'your-openai-api-key-here'
+   
+   Thay bằng:
+   OPENAI_API_KEY = 'sk-your-actual-key-here'
+
+Bước 3: Cài đặt thư viện
+   pip install openai==0.28.1
+
+Bước 4: Khởi động lại server
+   python manage.py runserver
+
+========================================
+KIỂM TRA HOẠT ĐỘNG:
+========================================
+
+Sau khi cấu hình, hệ thống sẽ tự động:
+✅ Sử dụng GPT để chat tự nhiên
+✅ Phân tích triệu chứng bằng AI
+✅ Trả lời câu hỏi thông minh hơn
+
+Nếu API key không hợp lệ hoặc hết quota:
+⚠️ Hệ thống tự động chuyển về chế độ fallback
+⚠️ Vẫn hoạt động bình thường
+
+========================================
+CHI PHÍ:
+========================================
+
+OpenAI GPT-3.5-turbo:
+- $0.0015 / 1K tokens input
+- $0.002 / 1K tokens output
+- Trung bình: ~$0.01 / 100 tin nhắn
+
+Ước tính:
+- 1000 bệnh nhân chat: ~$10
+- Có thể dùng free tier để test
+
+========================================
+LƯU Ý BẢO MẬT:
+========================================
+
+⚠️ KHÔNG commit API key lên Git
+⚠️ KHÔNG chia sẻ API key
+⚠️ Nên dùng biến môi trường:
+
+   import os
+   OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+
+========================================
+TEST CHATGPT:
+========================================
+
+Sau khi cấu hình, test với:
+- "Xin chào" → GPT sẽ trả lời tự nhiên
+- "Giá khám bao nhiêu?" → GPT trả lời chi tiết
+- "Tôi bị đau đầu" → GPT phân tích và gợi ý
+
+========================================
+
+Hệ thống hiện tại hoạt động tốt với chế độ fallback.
+Chỉ cần bật GPT nếu muốn trải nghiệm AI tốt hơn!

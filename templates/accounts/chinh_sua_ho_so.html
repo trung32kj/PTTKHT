@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Chỉnh sửa hồ sơ{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 0 auto;">
+    <h2>Chỉnh sửa hồ sơ</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+                {% if profile.anh_dai_dien %}
+                <img src="{{ profile.anh_dai_dien.url }}" alt="Ảnh" style="width: 150px; height: 150px; border-radius: 8px; object-fit: cover;">
+                {% else %}
+                <div style="width: 150px; height: 150px; background: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Không có ảnh</div>
+                {% endif %}
+            </div>
+            <div style="flex: 1;">
+                <div class="form-group">
+                    <label>Ảnh đại diện</label>
+                    <input type="file" name="anh_dai_dien" accept="image/*" id="anh_input">
+                    <small style="color: #666;">Định dạng: JPG, PNG. Kích thước tối đa: 5MB</small>
+                </div>
+            </div>
+        </div>
+        
+        <div id="preview_container" style="margin-bottom: 2rem; display: none;">
+            <h4>Preview ảnh mới:</h4>
+            <img id="preview_img" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+        </div>
+        
+        <div class="form-group">
+            <label>Họ *</label>
+            <input type="text" name="last_name" value="{{ user.last_name }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Tên *</label>
+            <input type="text" name="first_name" value="{{ user.first_name }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Email *</label>
+            <input type="email" name="email" value="{{ user.email }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Số điện thoại *</label>
+            <input type="text" name="so_dien_thoai" value="{{ profile.so_dien_thoai }}" required>
+        </div>
+        
+        {% if role == 'benh_nhan' %}
+        <div class="form-group">
+            <label>Địa chỉ</label>
+            <textarea name="dia_chi" rows="3">{{ profile.dia_chi }}</textarea>
+        </div>
+        {% elif role == 'bac_si' %}
+        <div class="form-group">
+            <label>Mô tả</label>
+            <textarea name="mo_ta" rows="3">{{ profile.mo_ta }}</textarea>
+        </div>
+        {% endif %}
+        
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-success" style="flex: 1;">Lưu thay đổi</button>
+            <a href="{% url 'ho_so' %}" class="btn" style="flex: 1; text-align: center;">Hủy</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('anh_input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('preview_img').src = event.target.result;
+            document.getElementById('preview_container').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

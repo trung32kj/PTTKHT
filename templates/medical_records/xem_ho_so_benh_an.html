@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi tiết hồ sơ bệnh án{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h2>Hồ sơ bệnh án</h2>
+    
+    <div style="background: #ecf0f1; padding: 1.5rem; border-radius: 4px; margin: 1.5rem 0;">
+        <h3 style="margin-bottom: 1rem;">Thông tin khám</h3>
+        <p><strong>Bệnh nhân:</strong> {{ ho_so.lich_hen.benh_nhan.nguoi_dung.get_full_name }}</p>
+        <p><strong>Bác sĩ:</strong> BS. {{ ho_so.lich_hen.bac_si.nguoi_dung.get_full_name }}</p>
+        <p><strong>Chuyên khoa:</strong> {{ ho_so.lich_hen.bac_si.chuyen_khoa }}</p>
+        <p><strong>Ngày khám:</strong> {{ ho_so.lich_hen.ngay }}</p>
+        <p><strong>Giờ:</strong> {{ ho_so.lich_hen.gio }}</p>
+    </div>
+    
+    <div style="margin: 1.5rem 0;">
+        <h3>Triệu chứng</h3>
+        <p style="background: #fff; padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">
+            {{ ho_so.lich_hen.trieu_chung|default:"Không có" }}
+        </p>
+    </div>
+    
+    <div style="margin: 1.5rem 0;">
+        <h3>Chẩn đoán</h3>
+        <p style="background: #fff; padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">
+            {{ ho_so.chan_doan }}
+        </p>
+    </div>
+    
+    <div style="margin: 1.5rem 0;">
+        <h3>Toa thuốc</h3>
+        {% if ho_so.toa_thuoc.exists %}
+        <table style="width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #ddd; border-radius: 4px;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 0.75rem; border-bottom: 1px solid #ddd; text-align: left;">STT</th>
+                    <th style="padding: 0.75rem; border-bottom: 1px solid #ddd; text-align: left;">Tên thuốc</th>
+                    <th style="padding: 0.75rem; border-bottom: 1px solid #ddd; text-align: left;">Số lượng</th>
+                    <th style="padding: 0.75rem; border-bottom: 1px solid #ddd; text-align: left;">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for thuoc in ho_so.toa_thuoc.all %}
+                <tr>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">{{ forloop.counter }}</td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">{{ thuoc.thuoc.ten_thuoc }}</td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">{{ thuoc.so_luong }} {{ thuoc.thuoc.don_vi }}</td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">{{ thuoc.ghi_chu|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="background: #fff; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; color: #7f8c8d;">
+            Không có toa thuốc được kê
+        </p>
+        {% endif %}
+    </div>
+    
+    {% if ho_so.ghi_chu %}
+    <div style="margin: 1.5rem 0;">
+        <h3>Ghi chú</h3>
+        <p style="background: #fff; padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">
+            {{ ho_so.ghi_chu }}
+        </p>
+    </div>
+    {% endif %}
+    
+    <p style="color: #7f8c8d; margin-top: 1.5rem;">
+        <small>Ngày tạo: {{ ho_so.ngay_tao|date:"d/m/Y H:i" }}</small>
+    </p>
+    
+    <a href="{% url 'lich_su_kham_benh' %}" class="btn" style="margin-top: 1rem;">Quay lại</a>
+</div>
+{% endblock %}

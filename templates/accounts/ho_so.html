@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Hồ sơ cá nhân{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Hồ sơ cá nhân</h2>
+        <a href="{% url 'chinh_sua_ho_so' %}" class="btn">Chỉnh sửa</a>
+    </div>
+    
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+        <div>
+            {% if profile.anh_dai_dien %}
+            <img src="{{ profile.anh_dai_dien.url }}" alt="Ảnh" style="width: 150px; height: 150px; border-radius: 8px; object-fit: cover;">
+            {% else %}
+            <div style="width: 150px; height: 150px; background: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">Không có ảnh</div>
+            {% endif %}
+        </div>
+        <div style="flex: 1;">
+            <table style="width: 100%;">
+                <tr>
+                    <th style="text-align: left; width: 150px;">Tên đăng nhập</th>
+                    <td>{{ user.username }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Họ tên</th>
+                    <td>{{ user.get_full_name }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Email</th>
+                    <td>{{ user.email }}</td>
+                </tr>
+                {% if role == 'benh_nhan' %}
+                <tr>
+                    <th style="text-align: left;">Ngày sinh</th>
+                    <td>{{ profile.ngay_sinh }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Giới tính</th>
+                    <td>{{ profile.get_gioi_tinh_display }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Số điện thoại</th>
+                    <td>{{ profile.so_dien_thoai }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Địa chỉ</th>
+                    <td>{{ profile.dia_chi }}</td>
+                </tr>
+                {% elif role == 'bac_si' %}
+                <tr>
+                    <th style="text-align: left;">Chuyên khoa</th>
+                    <td>{{ profile.chuyen_khoa }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Bằng cấp</th>
+                    <td>{{ profile.bang_cap }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Số điện thoại</th>
+                    <td>{{ profile.so_dien_thoai }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left;">Phí khám</th>
+                    <td>{{ profile.phi_kham }} VNĐ</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+    
+    <table style="display: none;"></table>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+═══════════════════════════════════════════════════════════════
+  HƯỚNG DẪN TEST CHỨC NĂNG CHỌN BÁC SĨ CỤ THỂ
+═══════════════════════════════════════════════════════════════
+
+✅ ĐÃ HOÀN THÀNH:
+-----------------
+1. Backend xử lý yêu cầu bác sĩ cụ thể (parse_doctor_request)
+2. So sánh với bác sĩ được đề xuất (handle_specific_doctor_request)
+3. Hiển thị cảnh báo khi chọn bác sĩ không tối ưu
+4. JavaScript xử lý xác nhận (confirmDoctorSelection)
+5. Tích hợp với flow đặt lịch
+
+═══════════════════════════════════════════════════════════════
+  CÁCH TEST TRÊN TRÌNH DUYỆT
+═══════════════════════════════════════════════════════════════
+
+BƯỚC 1: Khởi động server
+-------------------------
+python manage.py runserver
+
+hoặc
+
+START_SERVER.bat
+
+BƯỚC 2: Đăng nhập
+-----------------
+- Truy cập: http://127.0.0.1:8000
+- Đăng nhập với tài khoản bệnh nhân (VD: patient1 / 123456)
+
+BƯỚC 3: Mở AI Chatbox
+----------------------
+- Click vào icon robot ở góc dưới bên phải màn hình
+- Widget sẽ mở ra như Messenger
+
+BƯỚC 4: Test Flow Cơ Bản
+-------------------------
+1. Nhập triệu chứng:
+   "Tôi bị đau bụng, buồn nôn và tiêu chảy"
+
+2. AI sẽ phân tích và đề xuất bác sĩ chuyên khoa Tiêu hóa
+
+3. Chọn một bác sĩ được đề xuất → Hiển thị lịch trống
+
+BƯỚC 5: Test Yêu Cầu Bác Sĩ Cụ Thể (CHỨC NĂNG MỚI)
+---------------------------------------------------
+Sau khi nhận được gợi ý bác sĩ, nhập:
+
+A. Bác sĩ ĐƯỢC ĐỀ XUẤT:
+   "muốn đặt BS. Từ Thị Thảo"
+   
+   Kết quả mong đợi:
+   ✅ Hệ thống xác nhận đây là lựa chọn tốt
+   ✅ Tự động hiển thị lịch trống
+
+B. Bác sĩ KHÔNG ĐƯỢC ĐỀ XUẤT:
+   "muốn đặt BS. Văn A Nguyễn"
+   
+   Kết quả mong đợi:
+   ⚠️ Hiển thị cảnh báo so sánh
+   ⚠️ Hiển thị 2 nút:
+      - "✅ Có, tôi chắc chắn" → Hiển thị lịch trống
+      - "❌ Không, quay lại" → Quay về danh sách đề xuất
+
+BƯỚC 6: Test Đổi Chuyên Khoa
+-----------------------------
+1. Click nút "🔄 Xem bác sĩ chuyên khoa khác"
+
+2. Chọn chuyên khoa (VD: Tim mạch)
+
+3. Hệ thống hiển thị:
+   ⚠️ Cảnh báo không phải chuyên khoa tối ưu
+   📋 Danh sách bác sĩ Tim mạch
+   ❓ Xác nhận có muốn đặt không
+
+═══════════════════════════════════════════════════════════════
+  CÁC PATTERN TÊN BÁC SĨ HỆ THỐNG NHẬN DIỆN
+═══════════════════════════════════════════════════════════════
+
+✅ "muốn đặt BS. [Tên bác sĩ]"
+✅ "đặt lịch bác sĩ [Tên bác sĩ]"
+✅ "khám với BS [Tên bác sĩ]"
+✅ "bác sĩ [Tên bác sĩ] được không"
+✅ "[Tên bác sĩ] khác được không"
+
+Ví dụ:
+- "muốn đặt BS. Ánh Lê Thị Ngọc"
+- "đặt lịch bác sĩ Nguyễn Văn Hùng"
+- "Trần Thị Lan được không"
+
+═══════════════════════════════════════════════════════════════
+  DANH SÁCH BÁC SĨ MẪU ĐỂ TEST
+═══════════════════════════════════════════════════════════════
+
+Tim mạch:
+- BS. Văn A Nguyễn (200,000 VNĐ)
+- BS. Phạm Thị Hoa (350,000 VNĐ)
+
+Tai mũi họng:
+- BS. Tuấn Anh Lê (150,000 VNĐ)
+
+Nội khoa:
+- BS. Ánh Lê Thị Ngọc (180,000 VNĐ)
+- BS. Nguyễn Văn Hùng (250,000 VNĐ)
+- BS. Trần Thị Lan (300,000 VNĐ)
+
+Tiêu hóa:
+- BS. Từ Thị Thảo
+- BS. Mạc Văn Hải
+
+═══════════════════════════════════════════════════════════════
+  KIỂM TRA KẾT QUẢ
+═══════════════════════════════════════════════════════════════
+
+✅ Parse tên bác sĩ đúng
+✅ Tìm bác sĩ trong database
+✅ So sánh với danh sách đề xuất
+✅ Hiển thị cảnh báo khi không tối ưu
+✅ Nút xác nhận hoạt động
+✅ Quay lại danh sách đề xuất
+✅ Hiển thị lịch trống sau xác nhận
+✅ Đặt lịch thành công
+
+═══════════════════════════════════════════════════════════════
+  CHẠY TEST TỰ ĐỘNG
+═══════════════════════════════════════════════════════════════
+
+Test đơn vị:
+python test_doctor_name_request.py
+
+Test tích hợp đầy đủ:
+python test_complete_doctor_flow.py
+
+═══════════════════════════════════════════════════════════════
+  LƯU Ý
+═══════════════════════════════════════════════════════════════
+
+1. Đảm bảo đã chạy migrations:
+   python manage.py migrate
+
+2. Đảm bảo có dữ liệu bác sĩ và lịch làm việc:
+   python create_doctors_schedule.py
+
+3. Widget chỉ hiển thị cho user đã đăng nhập
+
+4. Cần có hồ sơ bệnh nhân để đặt lịch
+
+═══════════════════════════════════════════════════════════════

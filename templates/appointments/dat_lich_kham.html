@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Đặt lịch khám{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>Đặt lịch khám</h2>
+    
+    <div style="background: #ecf0f1; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+        <p><strong>Bác sĩ:</strong> BS. {{ lich_lam_viec.bac_si.nguoi_dung.get_full_name }}</p>
+        <p><strong>Chuyên khoa:</strong> {{ lich_lam_viec.bac_si.chuyen_khoa }}</p>
+        <p><strong>Ngày:</strong> {{ lich_lam_viec.ngay }}</p>
+        <p><strong>Giờ:</strong> {{ lich_lam_viec.gio_bat_dau }} - {{ lich_lam_viec.gio_ket_thuc }}</p>
+        <p><strong>Phí khám:</strong> {{ lich_lam_viec.bac_si.phi_kham }} VNĐ</p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Triệu chứng (tùy chọn)</label>
+            <textarea name="symptoms" rows="4" placeholder="Mô tả triệu chứng..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-success" style="width: 100%;">Xác nhận đặt lịch</button>
+    </form>
+    
+    <a href="{% url 'lich_lam_viec_bac_si' lich_lam_viec.bac_si.id %}" class="btn" style="margin-top: 1rem; display: block; text-align: center;">Quay lại</a>
+</div>
+{% endblock %}

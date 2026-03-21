@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Tạo hồ sơ bệnh án{% endblock %}
+
+{% block content %}
+<style>
+    .toa-thuoc-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+    }
+    .toa-thuoc-table th,
+    .toa-thuoc-table td {
+        border: 1px solid #ddd;
+        padding: 0.5rem;
+        text-align: left;
+    }
+    .toa-thuoc-table th {
+        background: #f8f9fa;
+        font-weight: bold;
+    }
+    .btn-add-medicine {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 1rem;
+    }
+    .btn-remove {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+</style>
+
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h2>Tạo hồ sơ bệnh án</h2>
+    
+    <div style="background: #ecf0f1; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+        <p><strong>Bệnh nhân:</strong> {{ lich_hen.benh_nhan.nguoi_dung.get_full_name }}</p>
+        <p><strong>Ngày khám:</strong> {{ lich_hen.ngay }}</p>
+        <p><strong>Giờ:</strong> {{ lich_hen.gio }}</p>
+        <p><strong>Triệu chứng:</strong> {{ lich_hen.trieu_chung|default:"Không có" }}</p>
+    </div>
+    
+    <form method="post" id="hoSoForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Chẩn đoán *</label>
+            <textarea name="diagnosis" rows="4" required placeholder="Nhập chẩn đoán..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Toa thuốc</label>
+            <button type="button" class="btn-add-medicine" onclick="addMedicine()">+ Thêm thuốc</button>
+            
+            <table class="toa-thuoc-table" id="toaThuocTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">STT</th>
+                        <th>Tên thuốc</th>
+                        <th style="width: 100px;">Số lượng</th>
+                        <th>Ghi chú</th>
+                        <th style="width: 80px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="toaThuocBody">
+                    <!-- Rows will be added dynamically -->
+                </tbody>
+            </table>
+            <input type="hidden" name="toa_thuoc_json" id="toaThuocJson">
+        </div>
+        
+        <div class="form-group">
+            <label>Ghi chú</label>
+            <textarea name="notes" rows="3" placeholder="Lời dặn, ghi chú thêm..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-success" style="width: 100%;">Lưu hồ sơ</button>
+    </form>
+    
+    <a href="{% url 'lich_hen_cua_toi' %}" class="btn" style="margin-top: 1rem; display: block; text-align: center;">Quay lại</a>
+</div>
+
+<script>
+let medicineCount = 0;
+let medicines = {};
+
+function addMedicine() {
+    medicineCount++;
+    const tbody = document.getElementById('toaThuocBody');
+    const row = document.createElement('tr');
+    row.id = `medicine-row-${medicineCount}`;
+    
+    row.innerHTML = `
+        <td>${medicineCount}</td>
+        <td>
+            <input type="text" placeholder="Tên thuốc" style="width: 100%; border: 1px solid #ddd; padding: 0.25rem;" 
+                   data-row-id="${medicineCount}" data-field="ten_thuoc" onchange="updateMedicine(this)">
+        </td>
+        <td>
+            <input type="number" min="1" value="1" placeholder="1" style="width: 100%; border: 1px solid #ddd; padding: 0.25rem;"
+                   data-row-id="${medicineCount}" data-field="so_luong" onchange="updateMedicine(this)">
+        </td>
+        <td>
+            <input type="text" placeholder="Ghi chú" style="width: 100%; border: 1px solid #ddd; padding: 0.25rem;"
+                   data-row-id="${medicineCount}" data-field="ghi_chu" onchange="updateMedicine(this)">
+        </td>
+        <td>
+            <button type="button" class="btn-remove" onclick="removeMedicine(${medicineCount})">Xóa</button>
+        </td>
+    `;
+    
+    tbody.appendChild(row);
+    
+    // Initialize medicine object
+    medicines[medicineCount] = {
+        ten_thuoc: '',
+        so_luong: '1',
+        ghi_chu: '',
+        don_vi: 'viên'
+    };
+    
+    updateHiddenField();
+}
+
+function updateMedicine(input) {
+    const rowId = input.getAttribute('data-row-id');
+    const field = input.getAttribute('data-field');
+    const value = input.value;
+    
+    if (!medicines[rowId]) {
+        medicines[rowId] = {
+            ten_thuoc: '',
+            so_luong: '1',
+            ghi_chu: '',
+            don_vi: 'viên'
+        };
+    }
+    
+    medicines[rowId][field] = value;
+    updateHiddenField();
+}
+
+function removeMedicine(id) {
+    const row = document.getElementById(`medicine-row-${id}`);
+    if (row) {
+        row.remove();
+        delete medicines[id];
+        updateHiddenField();
+        updateSTT();
+    }
+}
+
+function updateSTT() {
+    const rows = document.querySelectorAll('#toaThuocBody tr');
+    rows.forEach((row, index) => {
+        const sttCell = row.querySelector('td:first-child');
+        if (sttCell) {
+            sttCell.textContent = index + 1;
+        }
+    });
+}
+
+function updateHiddenField() {
+    // Get all valid medicines (có tên thuốc và số lượng)
+    const validMedicines = Object.values(medicines).filter(m => 
+        m && 
+        m.ten_thuoc && 
+        m.ten_thuoc.trim() && 
+        m.so_luong && 
+        parseInt(m.so_luong) > 0
+    );
+    
+    const jsonData = JSON.stringify(validMedicines);
+    document.getElementById('toaThuocJson').value = jsonData;
+}
+
+// Add first medicine row on page load
+document.addEventListener('DOMContentLoaded', function() {
+    addMedicine();
+});
+
+// Update hidden field before submit
+document.getElementById('hoSoForm').addEventListener('submit', function(e) {
+    updateHiddenField();
+});
+</script>
+{% endblock %}

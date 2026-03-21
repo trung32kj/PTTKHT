@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý bác sĩ{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 1rem;
+    }
+    .page-header h1 {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin: 0;
+    }
+    .stat-badge {
+        background: #3498db;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    .tab-btn {
+        padding: 0.75rem 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #7f8c8d;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    .tab-btn.active {
+        color: #3498db;
+        border-bottom-color: #3498db;
+    }
+    .tab-btn:hover {
+        color: #2c3e50;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .form-section {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    .form-grid.full {
+        grid-template-columns: 1fr;
+    }
+    .form-group label {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        border: 1px solid #bdc3c7;
+        transition: border-color 0.3s ease;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    .preview-container {
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 2px dashed #bdc3c7;
+    }
+    .preview-img {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    .submit-btn {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+    .doctor-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .doctor-list-header h3 {
+        margin: 0;
+        color: #2c3e50;
+    }
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+    }
+    table th {
+        background: #34495e;
+        color: white;
+        font-weight: 600;
+        text-align: left;
+    }
+    table td {
+        padding: 1rem 0.75rem;
+    }
+    table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    .doctor-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .doctor-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #ecf0f1;
+    }
+    .doctor-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .action-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    .action-btn-deactivate {
+        background: #f39c12;
+        color: white;
+    }
+    .action-btn-deactivate:hover {
+        background: #e67e22;
+    }
+    .action-btn-activate {
+        background: #27ae60;
+        color: white;
+    }
+    .action-btn-activate:hover {
+        background: #229954;
+    }
+    .action-btn-delete {
+        background: #e74c3c;
+        color: white;
+    }
+    .action-btn-delete:hover {
+        background: #c0392b;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #7f8c8d;
+    }
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .tabs {
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        table {
+            font-size: 0.9rem;
+        }
+        table td {
+            padding: 0.75rem 0.5rem;
+        }
+        .action-buttons {
+            flex-direction: column;
+        }
+        .action-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1>👨‍⚕️ Quản lý bác sĩ</h1>
+    <div class="stat-badge">Tổng: {{ bac_si_list.count }} bác sĩ</div>
+</div>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('add-doctor')">➕ Thêm bác sĩ mới</button>
+    <button class="tab-btn" onclick="switchTab('doctor-list')">📋 Danh sách bác sĩ</button>
+</div>
+
+<!-- Tab: Thêm bác sĩ mới -->
+<div id="add-doctor" class="tab-content active">
+    <div class="form-section">
+        <h3 style="margin-top: 0; color: #2c3e50; margin-bottom: 1.5rem;">Thêm bác sĩ từ tài khoản có sẵn</h3>
+        
+        {% if available_users %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_existing">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Chọn tài khoản <span style="color: #e74c3c;">*</span></label>
+                    <select name="user_id" required>
+                        <option value="">-- Chọn tài khoản --</option>
+                        {% for user in available_users %}
+                        <option value="{{ user.id }}">{{ user.username }} ({{ user.get_full_name }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Chuyên khoa <span style="color: #e74c3c;">*</span></label>
+                    <select name="chuyen_khoa" required>
+                        <option value="">-- Chọn chuyên khoa --</option>
+                        {% for ck in chuyen_khoa_list %}
+                        <option value="{{ ck.id }}">{{ ck.ten }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Bằng cấp <span style="color: #e74c3c;">*</span></label>
+                    <input type="text" name="bang_cap" placeholder="Bác sĩ chuyên khoa I" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Số điện thoại <span style="color: #e74c3c;">*</span></label>
+                    <input type="text" name="so_dien_thoai" placeholder="0123456789" required>
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Phí khám (VNĐ) <span style="color: #e74c3c;">*</span></label>
+                    <input type="number" name="phi_kham" value="200000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ảnh đại diện</label>
+                    <input type="file" name="anh_dai_dien" accept="image/*" id="anh_input_existing">
+                    <small style="color: #7f8c8d; display: block; margin-top: 0.5rem;">📷 JPG, PNG (tối đa 5MB)</small>
+                </div>
+            </div>
+            
+            <div class="form-group form-grid full">
+                <label>Mô tả</label>
+                <textarea name="mo_ta" rows="4" placeholder="Nhập mô tả về bác sĩ..."></textarea>
+            </div>
+            
+            <div id="preview_container_existing" class="preview-container" style="display: none; margin-bottom: 1.5rem;">
+                <p style="margin: 0 0 0.75rem 0; color: #7f8c8d; font-size: 0.9rem;">Xem trước ảnh:</p>
+                <img id="preview_img_existing" class="preview-img">
+            </div>
+            
+            <button type="submit" class="btn btn-success submit-btn">✓ Thêm bác sĩ</button>
+        </form>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Không có tài khoản nào để chọn</p>
+            <p style="font-size: 0.9rem;">Vui lòng tạo tài khoản trước khi thêm bác sĩ</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tab: Danh sách bác sĩ -->
+<div id="doctor-list" class="tab-content">
+    <div class="doctor-list-header">
+        <h3>Danh sách bác sĩ</h3>
+    </div>
+    
+    {% if bac_si_list %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 60px;">Ảnh</th>
+                    <th>Tên bác sĩ</th>
+                    <th>Chuyên khoa</th>
+                    <th>Số điện thoại</th>
+                    <th>Phí khám</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 200px;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bs in bac_si_list %}
+                <tr>
+                    <td>
+                        {% if bs.anh_dai_dien %}
+                        <img src="{{ bs.anh_dai_dien.url }}" class="doctor-avatar">
+                        {% else %}
+                        <div class="doctor-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            {{ bs.nguoi_dung.get_full_name|first|upper }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="doctor-name">BS. {{ bs.nguoi_dung.get_full_name }}</div>
+                        <small style="color: #7f8c8d;">{{ bs.bang_cap }}</small>
+                    </td>
+                    <td>{{ bs.chuyen_khoa }}</td>
+                    <td>{{ bs.so_dien_thoai }}</td>
+                    <td style="font-weight: 600; color: #27ae60;">{{ bs.phi_kham|floatformat:0 }} VNĐ</td>
+                    <td>
+                        {% if bs.nguoi_dung.is_active %}
+                        <span class="status-badge status-active">✓ Hoạt động</span>
+                        {% else %}
+                        <span class="status-badge status-inactive">✗ Tạm ngưng</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            {% if bs.nguoi_dung.is_active %}
+                            <form method="post" style="display: inline; width: 100%;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="deactivate">
+                                <input type="hidden" name="bac_si_id" value="{{ bs.id }}">
+                                <button type="submit" class="action-btn action-btn-deactivate" onclick="return confirm('Tạm ngưng tài khoản này?')">⏸ Tạm ngưng</button>
+                            </form>
+                            {% else %}
+                            <form method="post" style="display: inline; width: 100%;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="activate">
+                                <input type="hidden" name="bac_si_id" value="{{ bs.id }}">
+                                <button type="submit" class="action-btn action-btn-activate">▶ Kích hoạt</button>
+                            </form>
+                            {% endif %}
+                            <form method="post" style="display: inline; width: 100%;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="bac_si_id" value="{{ bs.id }}">
+                                <button type="submit" class="action-btn action-btn-delete" onclick="return confirm('Xóa bác sĩ này? Hành động này không thể hoàn tác!')">🗑 Xóa</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">👨‍⚕️</div>
+        <p style="font-size: 1.1rem; font-weight: 600;">Chưa có bác sĩ nào</p>
+        <p>Hãy thêm bác sĩ đầu tiên bằng cách chuyển sang tab "Thêm bác sĩ mới"</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function switchTab(tabName) {
+    // Hide all tabs
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Remove active class from all buttons
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected tab
+    document.getElementById(tabName).classList.add('active');
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+}
+
+// Image preview
+document.getElementById('anh_input_existing').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB');
+            this.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('preview_img_existing').src = event.target.result;
+            document.getElementById('preview_container_existing').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}
