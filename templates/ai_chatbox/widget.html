@@ -5,34 +5,35 @@
         <i class="fas fa-robot"></i>
         <span class="chat-badge" id="chatBadge" style="display: none;">1</span>
     </div>
-    
+
     <!-- Chat Window -->
     <div id="chatWindow" class="chat-window" style="display: none;">
         <div class="chat-header">
             <div class="chat-title">
                 <i class="fas fa-robot"></i>
-                <span>AI Tu van</span>
+                <span>AI Tư vấn Sức khỏe</span>
             </div>
             <div class="chat-controls">
                 <button onclick="minimizeChat()" class="btn-minimize">−</button>
                 <button onclick="closeChat()" class="btn-close">×</button>
             </div>
         </div>
-        
+
         <div class="chat-body" id="chatBody">
             <div class="welcome-message">
                 <div class="ai-message">
                     <div class="message-avatar">🤖</div>
                     <div class="message-content">
-                        Xin chao! Toi la tro ly AI. Hay mo ta trieu chung de toi goi y bac si phu hop.
+                        Xin chào! Tôi là trợ lý AI của phòng khám. Hãy mô tả triệu chứng để tôi gợi ý bác sĩ phù hợp
+                        nhất cho bạn.
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="chat-input-area">
             <div class="input-container">
-                <input type="text" id="chatInput" placeholder="Mo ta trieu chung..." maxlength="300">
+                <input type="text" id="chatInput" placeholder="Mô tả triệu chứng của bạn..." maxlength="300">
                 <button id="sendBtn" onclick="sendWidgetMessage()">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -42,563 +43,632 @@
 </div>
 
 <style>
-.chat-widget {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.chat-toggle {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.chat-toggle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-}
-
-.chat-toggle i {
-    color: white;
-    font-size: 24px;
-}
-
-.chat-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ff4757;
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-.chat-window {
-    position: absolute;
-    bottom: 80px;
-    right: 0;
-    width: 350px;
-    height: 500px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.chat-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-}
-
-.chat-controls {
-    display: flex;
-    gap: 5px;
-}
-
-.btn-minimize, .btn-close {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    color: white;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-minimize:hover, .btn-close:hover {
-    background: rgba(255,255,255,0.3);
-}
-
-.chat-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    background: #f8f9fa;
-}
-
-.ai-message, .user-message {
-    display: flex;
-    margin-bottom: 15px;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.user-message {
-    flex-direction: row-reverse;
-}
-
-.message-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-}
-
-.ai-message .message-avatar {
-    background: #e3f2fd;
-}
-
-.user-message .message-avatar {
-    background: #007bff;
-    color: white;
-    font-size: 12px;
-}
-
-.message-content {
-    max-width: 250px;
-    padding: 10px 12px;
-    border-radius: 18px;
-    word-wrap: break-word;
-    line-height: 1.4;
-}
-
-.ai-message .message-content {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-bottom-left-radius: 4px;
-}
-
-.user-message .message-content {
-    background: #007bff;
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-
-.chat-input-area {
-    padding: 15px;
-    background: white;
-    border-top: 1px solid #e0e0e0;
-}
-
-.input-container {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.input-container input {
-    flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    outline: none;
-    font-size: 14px;
-}
-
-.input-container input:focus {
-    border-color: #007bff;
-}
-
-.input-container button {
-    width: 36px;
-    height: 36px;
-    background: #007bff;
-    border: none;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.input-container button:hover {
-    background: #0056b3;
-}
-
-.input-container button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.doctor-selection {
-    margin-top: 10px;
-}
-
-.doctor-option {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 8px 10px;
-    margin: 5px 0;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 13px;
-}
-
-.doctor-option:hover {
-    border-color: #007bff;
-    background: #f8f9ff;
-}
-
-.specialty-option {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 8px 10px;
-    margin: 3px 0;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s;
-}
-
-.specialty-option:hover {
-    border-color: #007bff;
-    background: #f0f8ff;
-}
-
-.slot-option {
-    background: #e8f5e8;
-    border: 1px solid #c3e6c3;
-    border-radius: 6px;
-    padding: 6px 8px;
-    margin: 3px 0;
-    cursor: pointer;
-    font-size: 12px;
-    text-align: center;
-}
-
-.slot-option:hover {
-    background: #d4edda;
-}
-
-.typing-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 10px 0;
-    font-style: italic;
-    color: #666;
-    font-size: 13px;
-}
-
-.typing-dots {
-    display: flex;
-    gap: 2px;
-}
-
-.typing-dots span {
-    width: 4px;
-    height: 4px;
-    background: #666;
-    border-radius: 50%;
-    animation: typing 1.4s infinite;
-}
-
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typing {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-10px); }
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-    .chat-window {
-        width: calc(100vw - 40px);
-        height: 70vh;
-        bottom: 80px;
+    .chat-widget {
+        position: fixed;
+        bottom: 20px;
         right: 20px;
+        z-index: 9999;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-}
+
+    .chat-toggle {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #3B7FC4 0%, #4A90E2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(59, 127, 196, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .chat-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(59, 127, 196, 0.4);
+    }
+
+    .chat-toggle i {
+        color: white;
+        font-size: 24px;
+    }
+
+    .chat-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #EF4444;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .chat-window {
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+        width: 380px;
+        height: 550px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(59, 127, 196, 0.15);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .chat-header {
+        background: linear-gradient(135deg, #3B7FC4 0%, #4A90E2 100%);
+        color: white;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .chat-controls {
+        display: flex;
+        gap: 6px;
+    }
+
+    .btn-minimize,
+    .btn-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .btn-minimize:hover,
+    .btn-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        background: #F8FAFB;
+    }
+
+    .ai-message,
+    .user-message {
+        display: flex;
+        margin-bottom: 16px;
+        align-items: flex-start;
+        gap: 10px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .user-message {
+        flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .ai-message .message-avatar {
+        background: linear-gradient(135deg, #E8F4FD, #DBEAFE);
+    }
+
+    .user-message .message-avatar {
+        background: linear-gradient(135deg, #3B7FC4, #4A90E2);
+        color: white;
+        font-size: 14px;
+    }
+
+    .message-content {
+        max-width: 260px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        word-wrap: break-word;
+        line-height: 1.5;
+        font-size: 14px;
+    }
+
+    .ai-message .message-content {
+        background: white;
+        border: 1px solid #E5E7EB;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-message .message-content {
+        background: linear-gradient(135deg, #3B7FC4, #4A90E2);
+        color: white;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 2px 8px rgba(59, 127, 196, 0.25);
+    }
+
+    .chat-input-area {
+        padding: 16px;
+        background: white;
+        border-top: 1px solid #E5E7EB;
+    }
+
+    .input-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .input-container input {
+        flex: 1;
+        padding: 12px 14px;
+        border: 1px solid #E5E7EB;
+        border-radius: 24px;
+        outline: none;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .input-container input:focus {
+        border-color: #3B7FC4;
+        box-shadow: 0 0 0 3px rgba(59, 127, 196, 0.1);
+    }
+
+    .input-container button {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #3B7FC4, #4A90E2);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(59, 127, 196, 0.25);
+    }
+
+    .input-container button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(59, 127, 196, 0.35);
+    }
+
+    .input-container button:disabled {
+        background: #E5E7EB;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .doctor-selection {
+        margin-top: 12px;
+    }
+
+    .doctor-option {
+        background: white;
+        border: 1.5px solid #E5E7EB;
+        border-radius: 12px;
+        padding: 12px;
+        margin: 8px 0;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 13px;
+    }
+
+    .doctor-option:hover {
+        border-color: #3B7FC4;
+        background: #F0F9FF;
+        transform: translateX(4px);
+    }
+
+    .specialty-option {
+        background: white;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin: 6px 0;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+
+    .specialty-option:hover {
+        border-color: #3B7FC4;
+        background: #F0F9FF;
+    }
+
+    .slot-option {
+        background: #D1FAE5;
+        border: 1.5px solid #A7F3D0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin: 6px 0;
+        cursor: pointer;
+        font-size: 13px;
+        text-align: center;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .slot-option:hover {
+        background: #A7F3D0;
+        transform: scale(1.02);
+    }
+
+    .typing-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 12px 0;
+        font-style: italic;
+        color: #6B7280;
+        font-size: 13px;
+    }
+
+    .typing-dots {
+        display: flex;
+        gap: 3px;
+    }
+
+    .typing-dots span {
+        width: 6px;
+        height: 6px;
+        background: #3B7FC4;
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+            opacity: 0.5;
+        }
+
+        30% {
+            transform: translateY(-8px);
+            opacity: 1;
+        }
+    }
+
+    /* Scrollbar */
+    .chat-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-body::-webkit-scrollbar-track {
+        background: #F5F7FA;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+        background: #3B7FC4;
+        border-radius: 3px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb:hover {
+        background: #2563A8;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .chat-window {
+            width: calc(100vw - 40px);
+            height: 70vh;
+            bottom: 80px;
+            right: 20px;
+        }
+
+        .message-content {
+            max-width: 220px;
+        }
+    }
 </style>
 
 <script>
-let widgetSessionId = null;
-let widgetAnalysisId = null;
-let widgetDoctorId = null;
-let isWidgetOpen = false;
-let lastRecommendedDoctors = null; // Lưu danh sách bác sĩ được đề xuất
+    let widgetSessionId = null;
+    let widgetAnalysisId = null;
+    let widgetDoctorId = null;
+    let isWidgetOpen = false;
+    let lastRecommendedDoctors = null; // Lưu danh sách bác sĩ được đề xuất
 
-// Khởi tạo widget
-document.addEventListener('DOMContentLoaded', function() {
-    // Enter để gửi tin nhắn
-    document.getElementById('chatInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendWidgetMessage();
-        }
+    // Khởi tạo widget
+    document.addEventListener('DOMContentLoaded', function () {
+        // Enter để gửi tin nhắn
+        document.getElementById('chatInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendWidgetMessage();
+            }
+        });
     });
-});
 
-function toggleChat() {
-    const chatWindow = document.getElementById('chatWindow');
-    const chatBadge = document.getElementById('chatBadge');
-    
-    if (isWidgetOpen) {
+    function toggleChat() {
+        const chatWindow = document.getElementById('chatWindow');
+        const chatBadge = document.getElementById('chatBadge');
+
+        if (isWidgetOpen) {
+            closeChat();
+        } else {
+            openChat();
+        }
+    }
+
+    function openChat() {
+        const chatWindow = document.getElementById('chatWindow');
+        const chatBadge = document.getElementById('chatBadge');
+
+        chatWindow.style.display = 'flex';
+        chatBadge.style.display = 'none';
+        isWidgetOpen = true;
+
+        // Khởi tạo session ngay khi mở chat
+        if (!widgetSessionId) {
+            startWidgetChat();
+        }
+
+        // Focus input
+        setTimeout(() => {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.focus();
+            }
+        }, 100);
+    }
+
+    function closeChat() {
+        const chatWindow = document.getElementById('chatWindow');
+        chatWindow.style.display = 'none';
+        isWidgetOpen = false;
+    }
+
+    function minimizeChat() {
         closeChat();
-    } else {
-        openChat();
     }
-}
 
-function openChat() {
-    const chatWindow = document.getElementById('chatWindow');
-    const chatBadge = document.getElementById('chatBadge');
-    
-    chatWindow.style.display = 'flex';
-    chatBadge.style.display = 'none';
-    isWidgetOpen = true;
-    
-    // Khởi tạo session ngay khi mở chat
-    if (!widgetSessionId) {
-        startWidgetChat();
+    async function startWidgetChat() {
+        console.log('🚀 Starting widget chat...');
+
+        try {
+            const csrfToken = getCSRFToken();
+            console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
+
+            if (!csrfToken) {
+                showWidgetError('Không thể lấy CSRF token. Vui lòng refresh trang.');
+                return;
+            }
+
+            console.log('Sending start_chat request...');
+            const response = await fetch('/ai-chatbox/api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'start_chat'
+                })
+            });
+
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            if (response.ok) {
+                widgetSessionId = data.session_id;
+                console.log('✅ Chat session created:', widgetSessionId);
+            } else {
+                console.error('❌ Start chat failed:', data);
+                showWidgetError(data.error || 'Lỗi khởi tạo chat');
+            }
+        } catch (error) {
+            console.error('❌ Network error:', error);
+            showWidgetError('Lỗi kết nối: ' + error.message);
+        }
     }
-    
-    // Focus input
-    setTimeout(() => {
+
+    async function sendWidgetMessage() {
         const chatInput = document.getElementById('chatInput');
-        if (chatInput) {
+        const sendBtn = document.getElementById('sendBtn');
+        const message = chatInput.value.trim();
+
+        console.log('📤 Sending message:', message);
+        console.log('Session ID:', widgetSessionId);
+
+        if (!message) {
+            showWidgetError('Vui lòng nhập tin nhắn');
+            return;
+        }
+
+        if (!widgetSessionId) {
+            console.log('⚠️ No session ID, trying to start chat...');
+            await startWidgetChat();
+            if (!widgetSessionId) {
+                showWidgetError('Không thể khởi tạo phiên chat');
+                return;
+            }
+        }
+
+        // Disable input
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+
+        // Hiển thị tin nhắn user
+        addWidgetMessage({
+            sender: 'user',
+            content: message,
+            timestamp: new Date().toISOString()
+        });
+
+        // Clear input
+        chatInput.value = '';
+
+        // Hiển thị typing indicator
+        showWidgetTyping(true);
+
+        try {
+            const csrfToken = getCSRFToken();
+            console.log('CSRF Token for message:', csrfToken ? 'Found' : 'Not found');
+
+            if (!csrfToken) {
+                throw new Error('Không thể lấy CSRF token');
+            }
+
+            console.log('Sending message request...');
+            const response = await fetch('/ai-chatbox/api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'send_message',
+                    session_id: widgetSessionId,
+                    message: message
+                })
+            });
+
+            console.log('Message response status:', response.status);
+            const data = await response.json();
+            console.log('Message response data:', data);
+
+            if (response.ok) {
+                // Hiển thị phản hồi AI
+                addWidgetMessage(data.ai_message);
+
+                // Xử lý phản hồi bác sĩ cụ thể
+                if (data.ai_message.data) {
+                    const messageData = data.ai_message.data;
+
+                    // Lưu analysis_id
+                    if (messageData.analysis_id) {
+                        widgetAnalysisId = messageData.analysis_id;
+                    }
+
+                    // Xử lý yêu cầu bác sĩ cụ thể với cảnh báo
+                    if (messageData.awaiting_confirmation && messageData.selected_doctor_id) {
+                        showDoctorConfirmation(messageData.selected_doctor_id, messageData.recommended_doctors);
+                    }
+                    // Hiển thị danh sách bác sĩ được đề xuất
+                    else if (messageData.recommended_doctors) {
+                        showWidgetDoctorSelection(messageData.recommended_doctors);
+                    }
+                    // Hiển thị bác sĩ chuyên khoa khác với cảnh báo
+                    else if (messageData.other_doctors) {
+                        showWidgetDoctorSelection(messageData.other_doctors);
+                    }
+                }
+
+                // Xử lý slots nếu có
+                if (data.slots && data.slots.message && data.slots.message.data) {
+                    showWidgetSlotSelection(data.slots.message.data.available_slots);
+                }
+            } else {
+                console.error('❌ Send message failed:', data);
+                showWidgetError(data.error || 'Lỗi gửi tin nhắn');
+            }
+        } catch (error) {
+            console.error('❌ Message network error:', error);
+            showWidgetError('Lỗi kết nối: ' + error.message);
+        } finally {
+            // Enable input
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            showWidgetTyping(false);
             chatInput.focus();
         }
-    }, 100);
-}
-
-function closeChat() {
-    const chatWindow = document.getElementById('chatWindow');
-    chatWindow.style.display = 'none';
-    isWidgetOpen = false;
-}
-
-function minimizeChat() {
-    closeChat();
-}
-
-async function startWidgetChat() {
-    console.log('🚀 Starting widget chat...');
-    
-    try {
-        const csrfToken = getCSRFToken();
-        console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
-        
-        if (!csrfToken) {
-            showWidgetError('Không thể lấy CSRF token. Vui lòng refresh trang.');
-            return;
-        }
-        
-        console.log('Sending start_chat request...');
-        const response = await fetch('/ai-chatbox/api/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                action: 'start_chat'
-            })
-        });
-        
-        console.log('Response status:', response.status);
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        if (response.ok) {
-            widgetSessionId = data.session_id;
-            console.log('✅ Chat session created:', widgetSessionId);
-        } else {
-            console.error('❌ Start chat failed:', data);
-            showWidgetError(data.error || 'Lỗi khởi tạo chat');
-        }
-    } catch (error) {
-        console.error('❌ Network error:', error);
-        showWidgetError('Lỗi kết nối: ' + error.message);
     }
-}
 
-async function sendWidgetMessage() {
-    const chatInput = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const message = chatInput.value.trim();
-    
-    console.log('📤 Sending message:', message);
-    console.log('Session ID:', widgetSessionId);
-    
-    if (!message) {
-        showWidgetError('Vui lòng nhập tin nhắn');
-        return;
-    }
-    
-    if (!widgetSessionId) {
-        console.log('⚠️ No session ID, trying to start chat...');
-        await startWidgetChat();
-        if (!widgetSessionId) {
-            showWidgetError('Không thể khởi tạo phiên chat');
-            return;
-        }
-    }
-    
-    // Disable input
-    chatInput.disabled = true;
-    sendBtn.disabled = true;
-    
-    // Hiển thị tin nhắn user
-    addWidgetMessage({
-        sender: 'user',
-        content: message,
-        timestamp: new Date().toISOString()
-    });
-    
-    // Clear input
-    chatInput.value = '';
-    
-    // Hiển thị typing indicator
-    showWidgetTyping(true);
-    
-    try {
-        const csrfToken = getCSRFToken();
-        console.log('CSRF Token for message:', csrfToken ? 'Found' : 'Not found');
-        
-        if (!csrfToken) {
-            throw new Error('Không thể lấy CSRF token');
-        }
-        
-        console.log('Sending message request...');
-        const response = await fetch('/ai-chatbox/api/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                action: 'send_message',
-                session_id: widgetSessionId,
-                message: message
-            })
-        });
-        
-        console.log('Message response status:', response.status);
-        const data = await response.json();
-        console.log('Message response data:', data);
-        
-        if (response.ok) {
-            // Hiển thị phản hồi AI
-            addWidgetMessage(data.ai_message);
-            
-            // Xử lý phản hồi bác sĩ cụ thể
-            if (data.ai_message.data) {
-                const messageData = data.ai_message.data;
-                
-                // Lưu analysis_id
-                if (messageData.analysis_id) {
-                    widgetAnalysisId = messageData.analysis_id;
-                }
-                
-                // Xử lý yêu cầu bác sĩ cụ thể với cảnh báo
-                if (messageData.awaiting_confirmation && messageData.selected_doctor_id) {
-                    showDoctorConfirmation(messageData.selected_doctor_id, messageData.recommended_doctors);
-                }
-                // Hiển thị danh sách bác sĩ được đề xuất
-                else if (messageData.recommended_doctors) {
-                    showWidgetDoctorSelection(messageData.recommended_doctors);
-                }
-                // Hiển thị bác sĩ chuyên khoa khác với cảnh báo
-                else if (messageData.other_doctors) {
-                    showWidgetDoctorSelection(messageData.other_doctors);
-                }
-            }
-            
-            // Xử lý slots nếu có
-            if (data.slots && data.slots.message && data.slots.message.data) {
-                showWidgetSlotSelection(data.slots.message.data.available_slots);
-            }
-        } else {
-            console.error('❌ Send message failed:', data);
-            showWidgetError(data.error || 'Lỗi gửi tin nhắn');
-        }
-    } catch (error) {
-        console.error('❌ Message network error:', error);
-        showWidgetError('Lỗi kết nối: ' + error.message);
-    } finally {
-        // Enable input
-        chatInput.disabled = false;
-        sendBtn.disabled = false;
-        showWidgetTyping(false);
-        chatInput.focus();
-    }
-}
+    function addWidgetMessage(message) {
+        const chatBody = document.getElementById('chatBody');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = message.sender === 'user' ? 'user-message' : 'ai-message';
 
-function addWidgetMessage(message) {
-    const chatBody = document.getElementById('chatBody');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = message.sender === 'user' ? 'user-message' : 'ai-message';
-    
-    const avatar = message.sender === 'user' ? '👤' : '🤖';
-    
-    messageDiv.innerHTML = `
+        const avatar = message.sender === 'user' ? '👤' : '🤖';
+
+        messageDiv.innerHTML = `
         <div class="message-avatar">${avatar}</div>
         <div class="message-content">${formatWidgetContent(message.content)}</div>
     `;
-    
-    chatBody.appendChild(messageDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
 
-function formatWidgetContent(content) {
-    return content
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/🔍|💡|👨‍⚕️|⚠️|📅|✅|❌/g, '<span style="font-size: 1.1em;">$&</span>')
-        .replace(/\n/g, '<br>');
-}
+        chatBody.appendChild(messageDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
 
-function showDoctorConfirmation(selectedDoctorId, recommendedDoctors) {
-    const chatBody = document.getElementById('chatBody');
-    const confirmDiv = document.createElement('div');
-    confirmDiv.className = 'doctor-confirmation';
-    
-    // Lưu danh sách bác sĩ được đề xuất
-    lastRecommendedDoctors = recommendedDoctors;
-    
-    let html = `
+    function formatWidgetContent(content) {
+        return content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/🔍|💡|👨‍⚕️|⚠️|📅|✅|❌/g, '<span style="font-size: 1.1em;">$&</span>')
+            .replace(/\n/g, '<br>');
+    }
+
+    function showDoctorConfirmation(selectedDoctorId, recommendedDoctors) {
+        const chatBody = document.getElementById('chatBody');
+        const confirmDiv = document.createElement('div');
+        confirmDiv.className = 'doctor-confirmation';
+
+        // Lưu danh sách bác sĩ được đề xuất
+        lastRecommendedDoctors = recommendedDoctors;
+
+        let html = `
         <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 12px; margin: 10px 0;">
             <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #856404;">
                 ⚠️ Xác nhận lựa chọn
@@ -620,17 +690,113 @@ function showDoctorConfirmation(selectedDoctorId, recommendedDoctors) {
             </div>
         </div>
     `;
-    
-    confirmDiv.innerHTML = html;
-    chatBody.appendChild(confirmDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
 
-async function confirmDoctorSelection(doctorId, confirmed) {
-    if (confirmed) {
-        // User xác nhận - lấy lịch trống
+        confirmDiv.innerHTML = html;
+        chatBody.appendChild(confirmDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    async function confirmDoctorSelection(doctorId, confirmed) {
+        if (confirmed) {
+            // User xác nhận - lấy lịch trống
+            showWidgetTyping(true);
+
+            try {
+                const csrfToken = getCSRFToken();
+                const response = await fetch('/ai-chatbox/api/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        action: 'select_doctor',
+                        session_id: widgetSessionId,
+                        doctor_id: doctorId,
+                        analysis_id: widgetAnalysisId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    addWidgetMessage(data.message);
+
+                    if (data.slots_available && data.message.data && data.message.data.available_slots) {
+                        showWidgetSlotSelection(data.message.data.available_slots);
+                    }
+                } else {
+                    showWidgetError(data.error || 'Lỗi chọn bác sĩ');
+                }
+            } catch (error) {
+                showWidgetError('Lỗi kết nối: ' + error.message);
+            } finally {
+                showWidgetTyping(false);
+            }
+        } else {
+            // User không xác nhận - hiển thị lại bác sĩ được đề xuất
+            addWidgetMessage({
+                sender: 'ai',
+                content: '↩️ Đã quay lại danh sách bác sĩ được đề xuất. Vui lòng chọn bác sĩ phù hợp:',
+                timestamp: new Date().toISOString()
+            });
+
+            // Hiển thị lại danh sách bác sĩ được đề xuất
+            if (lastRecommendedDoctors && lastRecommendedDoctors.length > 0) {
+                showWidgetDoctorSelection(lastRecommendedDoctors);
+            }
+        }
+    }
+
+    function showWidgetDoctorSelection(doctors) {
+        const chatBody = document.getElementById('chatBody');
+        const selectionDiv = document.createElement('div');
+        selectionDiv.className = 'doctor-selection';
+
+        // Lưu danh sách bác sĩ được đề xuất (chỉ lưu những bác sĩ is_recommended = true)
+        const recommendedDocs = doctors.filter(d => d.is_recommended !== false);
+        if (recommendedDocs.length > 0) {
+            lastRecommendedDoctors = recommendedDocs;
+        }
+
+        let html = '<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px;">Chọn bác sĩ:</div>';
+
+        doctors.forEach(doctor => {
+            const isRecommended = doctor.is_recommended !== false;
+            const bgColor = isRecommended ? '#f8fff9' : '#fff8f0';
+            const borderColor = isRecommended ? '#28a745' : '#ffc107';
+            const icon = isRecommended ? '✅' : '⚠️';
+
+            html += `
+            <div class="doctor-option" onclick="selectWidgetDoctor(${doctor.id})" 
+                 style="background: ${bgColor}; border-color: ${borderColor};">
+                ${icon} <strong>${doctor.name}</strong><br>
+                <small>${doctor.specialty} • ${doctor.fee.toLocaleString('vi-VN')} VNĐ • ⭐ ${doctor.rating}/5</small>
+                ${!isRecommended ? '<br><small style="color: #856404;">⚠️ Không phải chuyên khoa được đề xuất</small>' : ''}
+            </div>
+        `;
+        });
+
+        // Thêm nút xem bác sĩ khác
+        html += `
+        <div style="margin-top: 10px; text-align: center;">
+            <button onclick="showOtherSpecialties()" style="
+                background: #6c757d; color: white; border: none; 
+                padding: 8px 16px; border-radius: 15px; font-size: 12px; cursor: pointer;">
+                🔄 Xem bác sĩ chuyên khoa khác
+            </button>
+        </div>
+    `;
+
+        selectionDiv.innerHTML = html;
+        chatBody.appendChild(selectionDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    async function selectWidgetDoctor(doctorId) {
+        widgetDoctorId = doctorId;
         showWidgetTyping(true);
-        
+
         try {
             const csrfToken = getCSRFToken();
             const response = await fetch('/ai-chatbox/api/', {
@@ -646,14 +812,24 @@ async function confirmDoctorSelection(doctorId, confirmed) {
                     analysis_id: widgetAnalysisId
                 })
             });
-            
+
             const data = await response.json();
-            
+
             if (response.ok) {
                 addWidgetMessage(data.message);
-                
+
+                // Kiểm tra có slots không
                 if (data.slots_available && data.message.data && data.message.data.available_slots) {
                     showWidgetSlotSelection(data.message.data.available_slots);
+                }
+                // Kiểm tra có warning không (bác sĩ không tối ưu)
+                else if (data.warning) {
+                    // Không làm gì thêm, chỉ hiển thị warning message
+                    console.log('⚠️ Bác sĩ không được đề xuất');
+                }
+                // Kiểm tra không có slots
+                else if (data.no_slots) {
+                    console.log('❌ Bác sĩ không có lịch trống');
                 }
             } else {
                 showWidgetError(data.error || 'Lỗi chọn bác sĩ');
@@ -663,181 +839,75 @@ async function confirmDoctorSelection(doctorId, confirmed) {
         } finally {
             showWidgetTyping(false);
         }
-    } else {
-        // User không xác nhận - hiển thị lại bác sĩ được đề xuất
-        addWidgetMessage({
-            sender: 'ai',
-            content: '↩️ Đã quay lại danh sách bác sĩ được đề xuất. Vui lòng chọn bác sĩ phù hợp:',
-            timestamp: new Date().toISOString()
-        });
-        
-        // Hiển thị lại danh sách bác sĩ được đề xuất
-        if (lastRecommendedDoctors && lastRecommendedDoctors.length > 0) {
-            showWidgetDoctorSelection(lastRecommendedDoctors);
-        }
     }
-}
 
-function showWidgetDoctorSelection(doctors) {
-    const chatBody = document.getElementById('chatBody');
-    const selectionDiv = document.createElement('div');
-    selectionDiv.className = 'doctor-selection';
-    
-    // Lưu danh sách bác sĩ được đề xuất (chỉ lưu những bác sĩ is_recommended = true)
-    const recommendedDocs = doctors.filter(d => d.is_recommended !== false);
-    if (recommendedDocs.length > 0) {
-        lastRecommendedDoctors = recommendedDocs;
-    }
-    
-    let html = '<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px;">Chọn bác sĩ:</div>';
-    
-    doctors.forEach(doctor => {
-        const isRecommended = doctor.is_recommended !== false;
-        const bgColor = isRecommended ? '#f8fff9' : '#fff8f0';
-        const borderColor = isRecommended ? '#28a745' : '#ffc107';
-        const icon = isRecommended ? '✅' : '⚠️';
-        
-        html += `
-            <div class="doctor-option" onclick="selectWidgetDoctor(${doctor.id})" 
-                 style="background: ${bgColor}; border-color: ${borderColor};">
-                ${icon} <strong>${doctor.name}</strong><br>
-                <small>${doctor.specialty} • ${doctor.fee.toLocaleString('vi-VN')} VNĐ • ⭐ ${doctor.rating}/5</small>
-                ${!isRecommended ? '<br><small style="color: #856404;">⚠️ Không phải chuyên khoa được đề xuất</small>' : ''}
-            </div>
-        `;
-    });
-    
-    // Thêm nút xem bác sĩ khác
-    html += `
-        <div style="margin-top: 10px; text-align: center;">
-            <button onclick="showOtherSpecialties()" style="
-                background: #6c757d; color: white; border: none; 
-                padding: 8px 16px; border-radius: 15px; font-size: 12px; cursor: pointer;">
-                🔄 Xem bác sĩ chuyên khoa khác
-            </button>
-        </div>
-    `;
-    
-    selectionDiv.innerHTML = html;
-    chatBody.appendChild(selectionDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
+    function showWidgetSlotSelection(slots) {
+        const chatBody = document.getElementById('chatBody');
+        const selectionDiv = document.createElement('div');
 
-async function selectWidgetDoctor(doctorId) {
-    widgetDoctorId = doctorId;
-    showWidgetTyping(true);
-    
-    try {
-        const csrfToken = getCSRFToken();
-        const response = await fetch('/ai-chatbox/api/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                action: 'select_doctor',
-                session_id: widgetSessionId,
-                doctor_id: doctorId,
-                analysis_id: widgetAnalysisId
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            addWidgetMessage(data.message);
-            
-            // Kiểm tra có slots không
-            if (data.slots_available && data.message.data && data.message.data.available_slots) {
-                showWidgetSlotSelection(data.message.data.available_slots);
-            }
-            // Kiểm tra có warning không (bác sĩ không tối ưu)
-            else if (data.warning) {
-                // Không làm gì thêm, chỉ hiển thị warning message
-                console.log('⚠️ Bác sĩ không được đề xuất');
-            }
-            // Kiểm tra không có slots
-            else if (data.no_slots) {
-                console.log('❌ Bác sĩ không có lịch trống');
-            }
-        } else {
-            showWidgetError(data.error || 'Lỗi chọn bác sĩ');
-        }
-    } catch (error) {
-        showWidgetError('Lỗi kết nối: ' + error.message);
-    } finally {
-        showWidgetTyping(false);
-    }
-}
+        let html = '<div style="font-weight: 600; margin: 8px 0; font-size: 13px;">Chọn thời gian:</div>';
 
-function showWidgetSlotSelection(slots) {
-    const chatBody = document.getElementById('chatBody');
-    const selectionDiv = document.createElement('div');
-    
-    let html = '<div style="font-weight: 600; margin: 8px 0; font-size: 13px;">Chọn thời gian:</div>';
-    
-    slots.forEach(slot => {
-        html += `
+        slots.forEach(slot => {
+            html += `
             <div class="slot-option" onclick="bookWidgetAppointment(${slot.id})">
                 ${slot.display}
             </div>
         `;
-    });
-    
-    selectionDiv.innerHTML = html;
-    chatBody.appendChild(selectionDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
-
-async function bookWidgetAppointment(slotId) {
-    showWidgetTyping(true);
-    
-    try {
-        const response = await fetch('/ai-chatbox/api/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({
-                action: 'book_appointment',
-                session_id: widgetSessionId,
-                doctor_id: widgetDoctorId,
-                slot_id: slotId
-            })
         });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            addWidgetMessage(data.message);
-            
-            if (data.success) {
-                // Disable input sau khi đặt lịch thành công
-                document.getElementById('chatInput').disabled = true;
-                document.getElementById('sendBtn').disabled = true;
-            }
-        } else {
-            showWidgetError(data.error || 'Lỗi đặt lịch');
-        }
-    } catch (error) {
-        showWidgetError('Lỗi kết nối: ' + error.message);
-    } finally {
-        showWidgetTyping(false);
-    }
-}
 
-function showWidgetTyping(show) {
-    const chatBody = document.getElementById('chatBody');
-    let typingDiv = document.getElementById('widgetTyping');
-    
-    if (show) {
-        if (!typingDiv) {
-            typingDiv = document.createElement('div');
-            typingDiv.id = 'widgetTyping';
-            typingDiv.className = 'typing-indicator';
-            typingDiv.innerHTML = `
+        selectionDiv.innerHTML = html;
+        chatBody.appendChild(selectionDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    async function bookWidgetAppointment(slotId) {
+        showWidgetTyping(true);
+
+        try {
+            const response = await fetch('/ai-chatbox/api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    action: 'book_appointment',
+                    session_id: widgetSessionId,
+                    doctor_id: widgetDoctorId,
+                    slot_id: slotId
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                addWidgetMessage(data.message);
+
+                if (data.success) {
+                    // Disable input sau khi đặt lịch thành công
+                    document.getElementById('chatInput').disabled = true;
+                    document.getElementById('sendBtn').disabled = true;
+                }
+            } else {
+                showWidgetError(data.error || 'Lỗi đặt lịch');
+            }
+        } catch (error) {
+            showWidgetError('Lỗi kết nối: ' + error.message);
+        } finally {
+            showWidgetTyping(false);
+        }
+    }
+
+    function showWidgetTyping(show) {
+        const chatBody = document.getElementById('chatBody');
+        let typingDiv = document.getElementById('widgetTyping');
+
+        if (show) {
+            if (!typingDiv) {
+                typingDiv = document.createElement('div');
+                typingDiv.id = 'widgetTyping';
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = `
                 <div class="message-avatar">🤖</div>
                 <div>
                     AI đang phân tích
@@ -846,46 +916,46 @@ function showWidgetTyping(show) {
                     </div>
                 </div>
             `;
-            chatBody.appendChild(typingDiv);
+                chatBody.appendChild(typingDiv);
+            }
+        } else {
+            if (typingDiv) {
+                typingDiv.remove();
+            }
         }
-    } else {
-        if (typingDiv) {
-            typingDiv.remove();
-        }
+
+        chatBody.scrollTop = chatBody.scrollHeight;
     }
-    
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
 
-function showWidgetError(message) {
-    addWidgetMessage({
-        sender: 'ai',
-        content: `❌ ${message}`,
-        timestamp: new Date().toISOString()
-    });
-}
+    function showWidgetError(message) {
+        addWidgetMessage({
+            sender: 'ai',
+            content: `❌ ${message}`,
+            timestamp: new Date().toISOString()
+        });
+    }
 
-function showOtherSpecialties() {
-    const specialties = [
-        'Nội khoa', 'Tim mạch', 'Tai mũi họng', 'Da liễu', 'Mắt',
-        'Răng hàm mặt', 'Thần kinh', 'Tiêu hóa', 'Ngoại khoa', 'Sản phụ khoa'
-    ];
-    
-    const chatBody = document.getElementById('chatBody');
-    const selectionDiv = document.createElement('div');
-    selectionDiv.className = 'specialty-selection';
-    
-    let html = '<div style="font-weight: 600; margin: 10px 0; font-size: 13px;">🏥 Chọn chuyên khoa:</div>';
-    
-    specialties.forEach(specialty => {
-        html += `
-            <div class="specialty-option" onclick="requestSpecialtyDoctors('${specialty}')">
+    function showOtherSpecialties() {
+        const specialties = [
+            'Nội khoa', 'Tim mạch', 'Tai mũi họng', 'Da liễu', 'Mắt',
+            'Răng hàm mặt', 'Thần kinh', 'Tiêu hóa', 'Ngoại khoa', 'Sản phụ khoa'
+        ];
+
+        const chatBody = document.getElementById('chatBody');
+        const selectionDiv = document.createElement('div');
+        selectionDiv.className = 'specialty-selection';
+
+        let html = '<div style="font-weight: 600; margin: 10px 0; font-size: 13px;">🏥 Chọn chuyên khoa:</div>';
+
+        specialties.forEach(specialty => {
+            html += `
+            <div class="specialty-option" onclick="requestSpecialtyDoctors('${specialty}')"tyDoctors('${specialty}')">
                 🏥 ${specialty}
             </div>
         `;
-    });
-    
-    html += `
+        });
+
+        html += `
         <div style="margin-top: 8px; text-align: center;">
             <button onclick="goBackToRecommended()" style="
                 background: #28a745; color: white; border: none;
@@ -894,95 +964,83 @@ function showOtherSpecialties() {
             </button>
         </div>
     `;
-    
-    selectionDiv.innerHTML = html;
-    chatBody.appendChild(selectionDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
 
-async function requestSpecialtyDoctors(specialty) {
-    showWidgetTyping(true);
-    
-    try {
-        const csrfToken = getCSRFToken();
-        
-        const response = await fetch('/ai-chatbox/api/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                action: 'get_specialty_doctors',
-                session_id: widgetSessionId,
-                specialty: specialty
-            })
+        selectionDiv.innerHTML = html;
+        chatBody.appendChild(selectionDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    async function requestSpecialtyDoctors(specialty) {
+        showWidgetTyping(true);
+
+        try {
+            const csrfToken = getCSRFToken();
+
+            const response = await fetch('/ai-chatbox/api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'get_specialty_doctors',
+                    session_id: widgetSessionId,
+                    specialty: specialty
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                addWidgetMessage(data.message);
+
+                // Hiển thị danh sách bác sĩ nếu có
+                if (data.doctors && data.doctors.length > 0) {
+                    showWidgetDoctorSelection(data.doctors);
+                }
+            } else {
+                showWidgetError(data.error || 'Lỗi lấy danh sách bác sĩ');
+            }
+        } catch (error) {
+            showWidgetError('Lỗi kết nối: ' + error.message);
+        } finally {
+            showWidgetTyping(false);
+        }
+    }
+
+    function goBackToRecommended() {
+        addWidgetMessage({
+            sender: 'ai',
+            content: '↩️ Vui lòng nhập lại triệu chứng của bạn để nhận gợi ý bác sĩ phù hợp nhất.',
+            timestamp: new Date().toISOString()
         });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            addWidgetMessage(data.message);
-            
-            // Hiển thị danh sách bác sĩ nếu có
-            if (data.doctors && data.doctors.length > 0) {
-                showWidgetDoctorSelection(data.doctors);
-            }
-        } else {
-            showWidgetError(data.error || 'Lỗi lấy danh sách bác sĩ');
-        }
-    } catch (error) {
-        showWidgetError('Lỗi kết nối: ' + error.message);
-    } finally {
-        showWidgetTyping(false);
     }
-}
 
-function goBackToRecommended() {
-    addWidgetMessage({
-        sender: 'ai',
-        content: '↩️ Vui lòng nhập lại triệu chứng của bạn để nhận gợi ý bác sĩ phù hợp nhất.',
-        timestamp: new Date().toISOString()
-    });
-}
-
-// Utility function để lấy CSRF token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    // Utility function để lấy CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
 
-// Lấy CSRF token từ meta tag hoặc cookie
-function getCSRFToken() {
-    // Thử lấy từ meta tag trước
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (metaTag) {
-        return metaTag.getAttribute('content');
-    }
-    
-    // Nếu không có, lấy từ cookie
-    return getCookie('csrftoken');
-}
+    // Lấy CSRF token từ meta tag hoặc cookie
+    function getCSRFToken() {
+        // Thử lấy từ meta tag trước
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) {
+            return metaTag.getAttribute('content');
+        }
 
-// Lấy CSRF token từ meta tag hoặc cookie
-function getCSRFToken() {
-    // Thử lấy từ meta tag trước
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (metaTag) {
-        return metaTag.getAttribute('content');
+        // Nếu không có, lấy từ cookie
+        return getCookie('csrftoken');
     }
-    
-    // Nếu không có, lấy từ cookie
-    return getCookie('csrftoken');
-}
 </script>

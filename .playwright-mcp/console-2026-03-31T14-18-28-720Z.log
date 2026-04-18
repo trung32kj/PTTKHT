@@ -1,0 +1,3 @@
+[   26423ms] ReferenceError: sendMessage is not defined
+    at HTMLButtonElement.onclick (http://127.0.0.1:8000/ai-chatbox/:90:65)
+[   81065ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:8000/accounts/dang-nhap/:0

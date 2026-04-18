@@ -1,0 +1,7 @@
+[     167ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/appointments/danh-sach-bac-si/:0
+[   48362ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/appointments/danh-sach-bac-si/:0
+[   49659ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/appointments/danh-sach-bac-si/:0
+[   50472ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/appointments/danh-sach-bac-si/:0
+[  106472ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/appointments/danh-sach-bac-si/:0
+[  107981ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/appointments/danh-sach-bac-si/:0
+[  108742ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/appointments/danh-sach-bac-si/:0

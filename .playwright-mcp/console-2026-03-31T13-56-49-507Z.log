@@ -1,0 +1,5 @@
+[     336ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:8000/accounts/dang-nhap/?next=/appointments/danh-sach-bac-si/:0
+[     348ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/favicon.ico:0
+[   46357ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:8000/accounts/dang-nhap/?next=/appointments/danh-sach-bac-si/:0
+[   60947ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:8000/accounts/dang-nhap/?next=/appointments/danh-sach-bac-si/:0
+[   65331ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:8000/accounts/dang-nhap/?next=/appointments/danh-sach-bac-si/:0

@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+# MySQL Configuration - Use PyMySQL as fallback
+try:
+    import MySQLdb
+except ImportError:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -79,8 +86,16 @@ WSGI_APPLICATION = 'clinic_management.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'pttkht',
+        'USER': 'root',
+        'PASSWORD': '',  # Laragon mặc định không có password
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+        },
     }
 }
 
@@ -141,5 +156,5 @@ SESSION_COOKIE_SECURE = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# OpenAI API Configuration
-OPENAI_API_KEY = 'your-openai-api-key-here'  # Thay bằng API key thực tế
+# Google Gemini API Configuration
+GEMINI_API_KEY = 'AIzaSyCVIFIyX20YO9O55I1ToHulSYJfxD38UeQ'

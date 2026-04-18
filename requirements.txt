@@ -1,4 +1,5 @@
 Django==5.2.8
 Pillow==12.0.0
-openai==0.28.1
+google-generativeai==0.8.3
 pymysql==1.1.2
+mysqlclient==2.2.4

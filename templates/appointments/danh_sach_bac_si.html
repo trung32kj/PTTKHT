@@ -4,9 +4,9 @@
 
 {% block content %}
 <div class="card">
-    <h2>Danh sách bác sĩ</h2>
-    
-    <form method="get" style="margin-bottom: 1rem;">
+    <h2>🩺 Danh sách bác sĩ</h2>
+
+    <form method="get" style="margin-bottom: 2rem;">
         <div class="form-group">
             <label>Lọc theo chuyên khoa</label>
             <select name="specialty" onchange="this.form.submit()">
@@ -19,25 +19,28 @@
     </form>
 
     {% if bac_si_list %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+    <div class="doctor-grid">
         {% for bac_si in bac_si_list %}
-        <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; text-align: center;">
+        <div class="doctor-card">
             {% if bac_si.anh_dai_dien %}
-            <img src="{{ bac_si.anh_dai_dien.url }}" alt="Ảnh bác sĩ" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem;">
+            <img src="{{ bac_si.anh_dai_dien.url }}" alt="Ảnh bác sĩ" class="doctor-avatar">
             {% else %}
-            <div style="width: 120px; height: 120px; background: #ddd; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; color: #999;">Không ảnh</div>
+            <div class="doctor-avatar-placeholder">👨‍⚕️</div>
             {% endif %}
             <h3>BS. {{ bac_si.nguoi_dung.get_full_name }}</h3>
-            <p><strong>{{ bac_si.chuyen_khoa }}</strong></p>
-            <p style="color: #666; font-size: 0.9rem;">{{ bac_si.bang_cap }}</p>
-            <p style="color: #e74c3c; font-weight: bold; margin: 0.5rem 0;">{{ bac_si.phi_kham }} VNĐ</p>
-            <p style="color: #7f8c8d; font-size: 0.85rem; margin: 0.5rem 0;">{{ bac_si.mo_ta|truncatewords:15 }}</p>
-            <a href="{% url 'lich_lam_viec_bac_si' bac_si.id %}" class="btn" style="width: 100%; margin-top: 1rem;">Xem lịch</a>
+            <p class="doctor-specialty">{{ bac_si.chuyen_khoa }}</p>
+            <p class="doctor-degree">{{ bac_si.bang_cap }}</p>
+            <p class="doctor-fee">{{ bac_si.phi_kham|floatformat:0 }} VNĐ</p>
+            <p class="doctor-description">{{ bac_si.mo_ta|truncatewords:15 }}</p>
+            <a href="{% url 'lich_lam_viec_bac_si' bac_si.id %}" class="btn">Xem lịch làm việc</a>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <p>Không có bác sĩ nào</p>
+    <div class="empty-state">
+        <div class="icon">👨‍⚕️</div>
+        <p>Không có bác sĩ nào</p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

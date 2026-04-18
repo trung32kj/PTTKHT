@@ -1,73 +1,85 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Hệ thống quản lý phòng khám{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Extra CSS block for child templates -->
+    {% block extra_css %}{% endblock %}
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; line-height: 1.6; background: #f4f4f4; }
-        .navbar { background: #2c3e50; color: white; padding: 1rem; }
-        .navbar .container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .navbar h1 { font-size: 1.5rem; }
-        .navbar nav a { color: white; text-decoration: none; margin-left: 1.5rem; }
-        .navbar nav a:hover { text-decoration: underline; }
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .messages { margin: 1rem 0; }
-        .message { padding: 1rem; margin-bottom: 1rem; border-radius: 4px; }
-        .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem; }
-        .btn { display: inline-block; padding: 0.5rem 1rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
-        .btn:hover { background: #2980b9; }
-        .btn-success { background: #27ae60; }
-        .btn-success:hover { background: #229954; }
-        .btn-danger { background: #e74c3c; }
-        .btn-danger:hover { background: #c0392b; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        table th, table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; }
-        table th { background: #34495e; color: white; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
-        .stat-card h3 { font-size: 2rem; color: #3498db; margin-bottom: 0.5rem; }
-        .stat-card p { color: #7f8c8d; }
+        /* Page-specific overrides can go here */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 127, 196, 0.15);
+        }
     </style>
 </head>
+
 <body>
     <div class="navbar">
         <div class="container">
             <h1>🏥 Phòng khám</h1>
             <nav>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'bang_dieu_khien' %}">Dashboard</a>
-                    
-                    {% if user.ho_so_benh_nhan %}
-                        <!-- Menu cho bệnh nhân -->
-                        <a href="{% url 'ai_chatbox:chat_interface' %}">🤖 AI Tư vấn</a>
-                        <a href="{% url 'danh_sach_bac_si' %}">Bác sĩ</a>
-                        <a href="{% url 'lich_hen_cua_toi' %}">Lịch hẹn</a>
-                        <a href="{% url 'lich_su_kham_benh' %}">Hồ sơ</a>
-                    {% elif user.ho_so_bac_si %}
-                        <!-- Menu cho bác sĩ -->
-                        <a href="{% url 'lich_lam_viec_cua_toi' %}">Lịch làm việc</a>
-                        <a href="{% url 'lich_hen_cua_toi' %}">Lịch hẹn</a>
-                        <a href="{% url 'lich_su_kham_benh' %}">Hồ sơ bệnh án</a>
-                    {% else %}
-                        <!-- Menu cho admin -->
-                        <a href="{% url 'danh_sach_bac_si' %}">Bác sĩ</a>
-                        <a href="{% url 'lich_hen_cua_toi' %}">Lịch hẹn</a>
-                        <a href="{% url 'lich_su_kham_benh' %}">Hồ sơ</a>
-                        <a href="{% url 'quan_ly_bac_si' %}">Quản lý bác sĩ</a>
-                    {% endif %}
-                    <a href="{% url 'ho_so' %}">{{ user.username }}</a>
-                    <a href="{% url 'dang_xuat' %}">Đăng xuất</a>
+                <a href="{% url 'bang_dieu_khien' %}">Dashboard</a>
+
+                {% if user.ho_so_benh_nhan %}
+                <!-- Menu cho bệnh nhân -->
+                <a href="{% url 'ai_chatbox:chat_interface' %}">🤖 AI Tư vấn</a>
+                <a href="{% url 'danh_sach_bac_si' %}">Bác sĩ</a>
+                <a href="{% url 'lich_hen_cua_toi' %}">Lịch hẹn</a>
+                <a href="{% url 'lich_su_kham_benh' %}">Hồ sơ</a>
+                {% elif user.ho_so_bac_si %}
+                <!-- Menu cho bác sĩ -->
+                <a href="{% url 'lich_lam_viec_cua_toi' %}">Lịch làm việc</a>
+                <a href="{% url 'lich_hen_cua_toi' %}">Lịch hẹn</a>
+                <a href="{% url 'lich_su_kham_benh' %}">Hồ sơ bệnh án</a>
                 {% else %}
-                    <a href="{% url 'dang_nhap' %}">Đăng nhập</a>
-                    <a href="{% url 'dang_ky' %}">Đăng ký</a>
+                <!-- Menu cho admin -->
+                <a href="{% url 'danh_sach_bac_si' %}">Bác sĩ</a>
+                <a href="{% url 'lich_hen_cua_toi' %}">Lịch hẹn</a>
+                <a href="{% url 'lich_su_kham_benh' %}">Hồ sơ</a>
+                <a href="{% url 'quan_ly_bac_si' %}">Quản lý bác sĩ</a>
+                {% endif %}
+                <a href="{% url 'ho_so' %}">{{ user.username }}</a>
+                <a href="{% url 'dang_xuat' %}">Đăng xuất</a>
+                {% else %}
+                <a href="{% url 'dang_nhap' %}">Đăng nhập</a>
+                <a href="{% url 'dang_ky' %}">Đăng ký</a>
                 {% endif %}
             </nav>
         </div>
@@ -75,11 +87,11 @@
 
     <div class="container">
         {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="message {{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            </div>
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         {% block content %}{% endblock %}
@@ -87,7 +99,16 @@
 
     <!-- AI Chatbox Widget cho bệnh nhân -->
     {% if user.is_authenticated and user.ho_so_benh_nhan %}
-        {% include 'ai_chatbox/widget.html' %}
+    {% include 'ai_chatbox/widget.html' %}
     {% endif %}
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Dashboard JavaScript -->
+    <script src="{% static 'js/dashboard.js' %}"></script>
+
+    <!-- Extra JavaScript block for child templates -->
+    {% block extra_js %}{% endblock %}
 </body>
+
 </html>

@@ -1,198 +1,320 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Bảng điều khiển - Hệ thống quản lý phòng khám{% endblock %}
 
 {% block content %}
-<h2>Bảng điều khiển</h2>
+<div class="dashboard-header">
+    <h2><span class="greeting">Chào bạn</span>, {{ user.get_full_name|default:user.username }}! 👋</h2>
+    <p>Chào mừng bạn quay trở lại với hệ thống quản lý phòng khám</p>
+</div>
 
 {% if role == 'benh_nhan' %}
-    <!-- Dashboard cho bệnh nhân -->
-    <div class="stats">
-        <div class="stat-card">
-            <h3>{{ tong_lich_hen }}</h3>
-            <p>Tổng lịch hẹn</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ lich_hen_da_kham }}</h3>
-            <p>Đã khám</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ lich_hen_sap_toi|length }}</h3>
-            <p>Lịch sắp tới</p>
-        </div>
+<!-- Dashboard cho bệnh nhân -->
+<div class="stats">
+    <div class="stat-card">
+        <div class="icon">📅</div>
+        <h3>{{ tong_lich_hen }}</h3>
+        <p>Tổng lịch hẹn</p>
     </div>
+    <div class="stat-card">
+        <div class="icon">✅</div>
+        <h3>{{ lich_hen_da_kham }}</h3>
+        <p>Đã khám</p>
+    </div>
+    <div class="stat-card">
+        <div class="icon">🕐</div>
+        <h3>{{ lich_hen_sap_toi|length }}</h3>
+        <p>Lịch sắp tới</p>
+    </div>
+    <div class="stat-card">
+        <div class="icon">❌</div>
+        <h3>{{ lich_hen_huy }}</h3>
+        <p>Đã hủy</p>
+    </div>
+</div>
 
-    <div class="card">
-        <h3>Lịch hẹn sắp tới</h3>
-        {% if lich_hen_sap_toi %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Ngày</th>
-                        <th>Giờ</th>
-                        <th>Bác sĩ</th>
-                        <th>Chuyên khoa</th>
-                        <th>Trạng thái</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lich in lich_hen_sap_toi %}
-                    <tr>
-                        <td>{{ lich.ngay|date:"d/m/Y" }}</td>
-                        <td>{{ lich.gio }}</td>
-                        <td>{{ lich.bac_si.nguoi_dung.get_full_name }}</td>
-                        <td>{{ lich.bac_si.chuyen_khoa }}</td>
-                        <td>
-                            {% if lich.trang_thai == 'pending' %}
-                                <span style="color: orange;">Chờ xác nhận</span>
-                            {% elif lich.trang_thai == 'approved' %}
-                                <span style="color: green;">Đã xác nhận</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Bạn chưa có lịch hẹn nào.</p>
-        {% endif %}
-        <br>
-        <a href="{% url 'danh_sach_bac_si' %}" class="btn">Đặt lịch khám</a>
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <a href="{% url 'danh_sach_bac_si' %}" class="quick-action-btn">
+        <div class="icon">🩺</div>
+        <span>Đặt lịch khám</span>
+    </a>
+    <a href="{% url 'lich_hen_cua_toi' %}" class="quick-action-btn">
+        <div class="icon">📋</div>
+        <span>Xem lịch hẹn</span>
+    </a>
+    <a href="{% url 'lich_su_kham_benh' %}" class="quick-action-btn">
+        <div class="icon">📄</div>
+        <span>Hồ sơ bệnh án</span>
+    </a>
+    <a href="{% url 'ai_chatbox:chat_interface' %}" class="quick-action-btn">
+        <div class="icon">🤖</div>
+        <span>AI Tư vấn</span>
+    </a>
+</div>
+
+<!-- Appointment Trend Chart -->
+<div class="card">
+    <h3>📊 Xu hướng lịch hẹn (7 ngày qua)</h3>
+    <div class="chart-container">
+        <canvas id="appointmentTrendChart"></canvas>
     </div>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="card">
+    <h3>🗓️ Lịch hẹn sắp tới</h3>
+    {% if lich_hen_sap_toi %}
+    <table>
+        <thead>
+            <tr>
+                <th>Ngày</th>
+                <th>Giờ</th>
+                <th>Bác sĩ</th>
+                <th>Chuyên khoa</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lich in lich_hen_sap_toi %}
+            <tr>
+                <td>{{ lich.ngay|date:"d/m/Y" }}</td>
+                <td>{{ lich.gio }}</td>
+                <td>{{ lich.bac_si.nguoi_dung.get_full_name }}</td>
+                <td>{{ lich.bac_si.chuyen_khoa }}</td>
+                <td>
+                    {% if lich.trang_thai == 'pending' %}
+                    <span class="status-badge status-pending">Chờ xác nhận</span>
+                    {% elif lich.trang_thai == 'approved' %}
+                    <span class="status-badge status-approved">Đã xác nhận</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">📅</div>
+        <p>Bạn chưa có lịch hẹn nào</p>
+        <a href="{% url 'danh_sach_bac_si' %}" class="btn">Đặt lịch khám ngay</a>
+    </div>
+    {% endif %}
+</div>
 
 {% elif role == 'bac_si' %}
-    <!-- Dashboard cho bác sĩ -->
-    <div class="stats">
-        <div class="stat-card">
-            <h3>{{ lich_hen_hom_nay|length }}</h3>
-            <p>Lịch hẹn hôm nay</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ lich_hen_cho_xac_nhan }}</h3>
-            <p>Chờ xác nhận</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ tong_benh_nhan }}</h3>
-            <p>Tổng bệnh nhân</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ lich_hen_thang_nay }}</h3>
-            <p>Lịch tháng này</p>
-        </div>
+<!-- Dashboard cho bác sĩ -->
+<div class="stats">
+    <div class="stat-card">
+        <div class="icon">📅</div>
+        <h3>{{ lich_hen_hom_nay|length }}</h3>
+        <p>Lịch hẹn hôm nay</p>
     </div>
+    <div class="stat-card">
+        <div class="icon">⏳</div>
+        <h3>{{ lich_hen_cho_xac_nhan }}</h3>
+        <p>Chờ xác nhận</p>
+    </div>
+    <div class="stat-card">
+        <div class="icon">👥</div>
+        <h3>{{ tong_benh_nhan }}</h3>
+        <p>Tổng bệnh nhân</p>
+    </div>
+    <div class="stat-card">
+        <div class="icon">📊</div>
+        <h3>{{ lich_hen_thang_nay }}</h3>
+        <p>Lịch tháng này</p>
+    </div>
+</div>
 
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <a href="{% url 'lich_lam_viec_cua_toi' %}" class="quick-action-btn">
+        <div class="icon">🗓️</div>
+        <span>Lịch làm việc</span>
+    </a>
+    <a href="{% url 'lich_hen_cua_toi' %}" class="quick-action-btn">
+        <div class="icon">📋</div>
+        <span>Quản lý lịch hẹn</span>
+    </a>
+    <a href="{% url 'lich_su_kham_benh' %}" class="quick-action-btn">
+        <div class="icon">📄</div>
+        <span>Hồ sơ bệnh án</span>
+    </a>
+    <a href="{% url 'ho_so' %}" class="quick-action-btn">
+        <div class="icon">👤</div>
+        <span>Hồ sơ cá nhân</span>
+    </a>
+</div>
+
+<!-- Charts Row -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <div class="card">
-        <h3>Lịch hẹn hôm nay</h3>
-        {% if lich_hen_hom_nay %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Giờ</th>
-                        <th>Bệnh nhân</th>
-                        <th>Số điện thoại</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lich in lich_hen_hom_nay %}
-                    <tr>
-                        <td>{{ lich.gio }}</td>
-                        <td>{{ lich.benh_nhan.nguoi_dung.get_full_name }}</td>
-                        <td>{{ lich.benh_nhan.so_dien_thoai }}</td>
-                        <td>
-                            {% if lich.trang_thai == 'pending' %}
-                                <span style="color: orange;">Chờ xác nhận</span>
-                            {% elif lich.trang_thai == 'approved' %}
-                                <span style="color: green;">Đã xác nhận</span>
-                            {% elif lich.trang_thai == 'completed' %}
-                                <span style="color: blue;">Đã khám</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if lich.trang_thai == 'pending' %}
-                                <a href="{% url 'xac_nhan_lich_hen' lich.id %}" class="btn btn-success">Xác nhận</a>
-                            {% elif lich.trang_thai == 'approved' %}
-                                <a href="{% url 'tao_ho_so_benh_an' lich.id %}" class="btn">Khám bệnh</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Không có lịch hẹn nào hôm nay.</p>
-        {% endif %}
+        <h3>📈 Xu hướng lịch hẹn (7 ngày qua)</h3>
+        <div class="chart-container">
+            <canvas id="appointmentTrendChart"></canvas>
+        </div>
     </div>
+    <div class="card">
+        <h3>📊 Phân bố trạng thái</h3>
+        <div class="chart-container">
+            <canvas id="statusDistributionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Appointments -->
+<div class="card">
+    <h3>🏥 Lịch hẹn hôm nay</h3>
+    {% if lich_hen_hom_nay %}
+    <table>
+        <thead>
+            <tr>
+                <th>Giờ</th>
+                <th>Bệnh nhân</th>
+                <th>Số điện thoại</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lich in lich_hen_hom_nay %}
+            <tr>
+                <td>{{ lich.gio }}</td>
+                <td>{{ lich.benh_nhan.nguoi_dung.get_full_name }}</td>
+                <td>{{ lich.benh_nhan.so_dien_thoai }}</td>
+                <td>
+                    {% if lich.trang_thai == 'pending' %}
+                    <span class="status-badge status-pending">Chờ xác nhận</span>
+                    {% elif lich.trang_thai == 'approved' %}
+                    <span class="status-badge status-approved">Đã xác nhận</span>
+                    {% elif lich.trang_thai == 'completed' %}
+                    <span class="status-badge status-completed">Đã khám</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if lich.trang_thai == 'pending' %}
+                    <a href="{% url 'xac_nhan_lich_hen' lich.id %}" class="btn btn-success">Xác nhận</a>
+                    {% elif lich.trang_thai == 'approved' %}
+                    <a href="{% url 'tao_ho_so_benh_an' lich.id %}" class="btn btn-primary">Khám bệnh</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">📅</div>
+        <p>Không có lịch hẹn nào hôm nay</p>
+    </div>
+    {% endif %}
+</div>
 
 {% else %}
-    <!-- Dashboard cho admin -->
-    <div class="stats">
-        <div class="stat-card">
-            <h3>{{ tong_benh_nhan }}</h3>
-            <p>Tổng bệnh nhân</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ tong_bac_si }}</h3>
-            <p>Tổng bác sĩ</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ lich_hen_hom_nay }}</h3>
-            <p>Lịch hẹn hôm nay</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ lich_hen_thang_nay }}</h3>
-            <p>Lịch tháng này</p>
-        </div>
+<!-- Dashboard cho admin -->
+<div class="stats">
+    <div class="stat-card">
+        <div class="icon">👥</div>
+        <h3>{{ tong_benh_nhan }}</h3>
+        <p>Tổng bệnh nhân</p>
     </div>
+    <div class="stat-card">
+        <div class="icon">👨‍⚕️</div>
+        <h3>{{ tong_bac_si }}</h3>
+        <p>Tổng bác sĩ</p>
+    </div>
+    <div class="stat-card">
+        <div class="icon">📅</div>
+        <h3>{{ lich_hen_hom_nay }}</h3>
+        <p>Lịch hẹn hôm nay</p>
+    </div>
+    <div class="stat-card">
+        <div class="icon">📊</div>
+        <h3>{{ lich_hen_thang_nay }}</h3>
+        <p>Lịch tháng này</p>
+    </div>
+</div>
 
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <a href="{% url 'quan_ly_bac_si' %}" class="quick-action-btn">
+        <div class="icon">👨‍⚕️</div>
+        <span>Quản lý bác sĩ</span>
+    </a>
+    <a href="{% url 'danh_sach_bac_si' %}" class="quick-action-btn">
+        <div class="icon">🩺</div>
+        <span>Danh sách bác sĩ</span>
+    </a>
+    <a href="{% url 'lich_hen_cua_toi' %}" class="quick-action-btn">
+        <div class="icon">📋</div>
+        <span>Quản lý lịch hẹn</span>
+    </a>
+    <a href="{% url 'lich_su_kham_benh' %}" class="quick-action-btn">
+        <div class="icon">📄</div>
+        <span>Hồ sơ bệnh án</span>
+    </a>
+</div>
+
+<!-- Charts Row -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <div class="card">
-        <h3>Trạng thái lịch hẹn</h3>
-        <div class="stats">
-            <div class="stat-card">
-                <h3>{{ so_cho_xac_nhan }}</h3>
-                <p>Chờ xác nhận</p>
-            </div>
-            <div class="stat-card">
-                <h3>{{ so_da_xac_nhan }}</h3>
-                <p>Đã xác nhận</p>
-            </div>
-            <div class="stat-card">
-                <h3>{{ so_da_kham }}</h3>
-                <p>Đã khám</p>
-            </div>
-            <div class="stat-card">
-                <h3>{{ so_da_huy }}</h3>
-                <p>Đã hủy</p>
-            </div>
+        <h3>📈 Xu hướng lịch hẹn (7 ngày qua)</h3>
+        <div class="chart-container">
+            <canvas id="appointmentTrendChart"></canvas>
         </div>
     </div>
-
     <div class="card">
-        <h3>Top 5 bác sĩ có nhiều lịch hẹn nhất</h3>
-        {% if top_bac_si %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Bác sĩ</th>
-                        <th>Chuyên khoa</th>
-                        <th>Số lịch hẹn</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for bac_si in top_bac_si %}
-                    <tr>
-                        <td>{{ bac_si.nguoi_dung.get_full_name }}</td>
-                        <td>{{ bac_si.chuyen_khoa }}</td>
-                        <td>{{ bac_si.so_lich_hen }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Chưa có dữ liệu.</p>
-        {% endif %}
+        <h3>📊 Phân bố trạng thái</h3>
+        <div class="chart-container">
+            <canvas id="statusDistributionChart"></canvas>
+        </div>
     </div>
+</div>
+
+<!-- Top Doctors -->
+<div class="card">
+    <h3>⭐ Top 5 bác sĩ có nhiều lịch hẹn nhất</h3>
+    {% if top_bac_si %}
+    <table>
+        <thead>
+            <tr>
+                <th>Bác sĩ</th>
+                <th>Chuyên khoa</th>
+                <th>Số lịch hẹn</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bac_si in top_bac_si %}
+            <tr>
+                <td>{{ bac_si.nguoi_dung.get_full_name }}</td>
+                <td>{{ bac_si.chuyen_khoa }}</td>
+                <td><strong>{{ bac_si.so_lich_hen }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">👨‍⚕️</div>
+        <p>Chưa có dữ liệu</p>
+    </div>
+    {% endif %}
+</div>
+
 {% endif %}
+
+<!-- Pass chart data to JavaScript -->
+<script>
+    {% if chart_data %}
+    window.chartData = {{ chart_data | safe }};
+    {% endif %}
+    {% if status_data %}
+    window.statusData = {{ status_data | safe }};
+    {% endif %}
+</script>
 
 {% endblock %}

@@ -116,6 +116,30 @@ class ChatAPIView(View):
         openai_service = OpenAIService()
         analysis_result = openai_service.analyze_symptoms(message_content)
         
+        # Kiểm tra xem input có hợp lệ không
+        if not analysis_result.get('is_valid', True):
+            # Input không hợp lệ - yêu cầu mô tả lại
+            error_message = ChatMessage.objects.create(
+                chat_session=chat_session,
+                nguoi_gui='ai',
+                noi_dung=f"❌ {analysis_result.get('message', 'Vui lòng mô tả triệu chứng cụ thể hơn.')}\n\n💡 **Ví dụ triệu chứng hợp lệ:**\n• Đau đầu kéo dài 3 ngày\n• Sốt cao, ho có đờm\n• Đau bụng, buồn nôn\n• Ngứa da, nổi mẩn đỏ"
+            )
+            
+            return JsonResponse({
+                'user_message': {
+                    'id': user_message.id,
+                    'sender': 'user',
+                    'content': user_message.noi_dung,
+                    'timestamp': user_message.thoi_gian.isoformat()
+                },
+                'ai_message': {
+                    'id': error_message.id,
+                    'sender': 'ai',
+                    'content': error_message.noi_dung,
+                    'timestamp': error_message.thoi_gian.isoformat()
+                }
+            })
+        
         # Lưu kết quả phân tích
         try:
             chuyen_khoa = ChuyenKhoa.objects.get(ten=analysis_result['chuyen_khoa_de_xuat'])

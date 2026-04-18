@@ -3,8 +3,8 @@
 {% block title %}Đăng nhập{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 500px; margin: 3rem auto;">
-    <h2 style="margin-bottom: 1.5rem; text-align: center;">Đăng nhập</h2>
+<div class="card form-container">
+    <h2>🔐 Đăng nhập</h2>
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
@@ -15,9 +15,9 @@
             <label>Mật khẩu</label>
             <input type="password" name="password" required>
         </div>
-        <button type="submit" class="btn" style="width: 100%;">Đăng nhập</button>
+        <button type="submit" class="btn">Đăng nhập</button>
     </form>
-    <p style="text-align: center; margin-top: 1rem;">
+    <p class="form-footer">
         Chưa có tài khoản? <a href="{% url 'dang_ky' %}">Đăng ký ngay</a>
     </p>
 </div>

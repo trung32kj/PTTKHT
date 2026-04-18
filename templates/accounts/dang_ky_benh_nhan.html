@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="card" style="max-width: 600px; margin: 2rem auto;">
-    <h2 style="margin-bottom: 1.5rem;">Đăng ký tài khoản bệnh nhân</h2>
+    <h2 style="margin-bottom: 1.5rem; text-align: center; color: var(--text-dark);">📝 Đăng ký tài khoản bệnh nhân</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
@@ -50,29 +50,30 @@
         <div class="form-group">
             <label>Ảnh đại diện</label>
             <input type="file" name="anh_dai_dien" accept="image/*" id="anh_input">
-            <small style="color: #666;">Định dạng: JPG, PNG. Kích thước tối đa: 5MB</small>
+            <small style="color: var(--text-light);">Định dạng: JPG, PNG. Kích thước tối đa: 5MB</small>
             <div id="preview_container" style="margin-top: 1rem; display: none;">
-                <img id="preview_img" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                <img id="preview_img"
+                    style="max-width: 200px; max-height: 200px; border-radius: 12px; border: 2px solid var(--glass-border);">
             </div>
         </div>
         <button type="submit" class="btn" style="width: 100%;">Đăng ký</button>
     </form>
-    <p style="text-align: center; margin-top: 1rem;">
+    <p class="form-footer">
         Đã có tài khoản? <a href="{% url 'dang_nhap' %}">Đăng nhập</a>
     </p>
 </div>
 
 <script>
-document.getElementById('anh_input').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('preview_img').src = event.target.result;
-            document.getElementById('preview_container').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
-});
+    document.getElementById('anh_input').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                document.getElementById('preview_img').src = event.target.result;
+                document.getElementById('preview_container').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 </script>
 {% endblock %}
