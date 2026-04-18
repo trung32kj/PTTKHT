@@ -1,0 +1,101 @@
+========================================
+DANH SÁCH TÀI KHOẢN HỆ THỐNG PHÒNG KHÁM
+========================================
+
+ADMIN:
+Username: admin
+Password: admin123
+URL: http://127.0.0.1:8000/admin/
+
+BÁC SĨ (34 bác sĩ - mỗi chuyên khoa có 2-3 bác sĩ):
+
+NỘI KHOA (3 bác sĩ):
+1. bs_nguyenvan / 123456 (BS. Nguyễn Văn An)
+2. bs_tranvan / 123456 (BS. Trần Văn Bình)
+3. bs_lethi / 123456 (BS. Lê Thị Cúc)
+
+TIM MẠCH (2 bác sĩ):
+4. bs_phamvan / 123456 (BS. Phạm Văn Đức)
+5. bs_hoangthi / 123456 (BS. Hoàng Thị Em)
+
+NGOẠI KHOA (3 bác sĩ):
+6. bs_vuvan / 123456 (BS. Vũ Văn Phúc)
+7. bs_dangthi / 123456 (BS. Đặng Thị Giang)
+8. bs_buivan / 123456 (BS. Bùi Văn Hải)
+
+DA LIỄU (2 bác sĩ):
+9. bs_ngothi / 123456 (BS. Ngô Thị Lan)
+10. bs_lyvan / 123456 (BS. Lý Văn Minh)
+
+TAI MŨI HỌNG (2 bác sĩ):
+11. bs_doivan / 123456 (BS. Đỗ Văn Nam)
+12. bs_vothi / 123456 (BS. Võ Thị Oanh)
+
+MẮT (2 bác sĩ):
+13. bs_maithi / 123456 (BS. Mai Thị Phương)
+14. bs_caovan / 123456 (BS. Cao Văn Quang)
+
+RĂNG HÀM MẶT (3 bác sĩ):
+15. bs_dinhvan / 123456 (BS. Đinh Văn Rồng)
+16. bs_tranthi / 123456 (BS. Trần Thị Sương)
+17. bs_levan / 123456 (BS. Lê Văn Tài)
+
+THẦN KINH (2 bác sĩ):
+18. bs_phamthi / 123456 (BS. Phạm Thị Uyên)
+19. bs_hoangvan / 123456 (BS. Hoàng Văn Việt)
+
+TIÊU HÓA (2 bác sĩ):
+20. bs_vuthi / 123456 (BS. Vũ Thị Xuân)
+21. bs_dangvan / 123456 (BS. Đặng Văn Yên)
+
+SẢN PHỤ KHOA (3 bác sĩ):
+22. bs_buithi / 123456 (BS. Bùi Thị Zung)
+23. bs_ngovan / 123456 (BS. Ngô Văn An2)
+24. bs_lythi / 123456 (BS. Lý Thị Bình2)
+
+NHI KHOA (2 bác sĩ):
+25. bs_doithi / 123456 (BS. Đỗ Thị Cường2)
+26. bs_voivan / 123456 (BS. Võ Văn Dũng2)
+
+CHẤN THƯƠNG CHỈNH HÌNH (2 bác sĩ):
+27. bs_maivan / 123456 (BS. Mai Văn Em2)
+28. bs_caothi / 123456 (BS. Cao Thị Phúc2)
+
+UNG BƯỚU (2 bác sĩ):
+29. bs_dinhvan2 / 123456 (BS. Đinh Văn Giang2)
+30. bs_tranthi2 / 123456 (BS. Trần Thị Hoa2)
+
+TÂM THẦN (2 bác sĩ):
+31. bs_levan2 / 123456 (BS. Lê Văn Lan2)
+32. bs_phamthi2 / 123456 (BS. Phạm Thị Minh2)
+
+PHỤC HỒI CHỨC NĂNG (2 bác sĩ):
+33. bs_hoangvan2 / 123456 (BS. Hoàng Văn Nam2)
+34. bs_vuthi2 / 123456 (BS. Vũ Thị Oanh2)
+
+BỆNH NHÂN:
+1. bn_nguyenthi / 123456 (Nguyễn Thị Hoa)
+2. bn_tranvan / 123456 (Trần Văn Nam)
+3. bn_lethi / 123456 (Lê Thị Mai)
+4. bn_phamvan / 123456 (Phạm Văn Đức)
+5. bn_hoangthi / 123456 (Hoàng Thị Linh)
+6. bn_vuvan / 123456 (Vũ Văn Tùng)
+7. bn_dangthi / 123456 (Đặng Thị Yến)
+8. bn_buivan / 123456 (Bùi Văn Khoa)
+9. bn_ngothi / 123456 (Ngô Thị Lan)
+10. bn_lyvan / 123456 (Lý Văn Minh)
+
+LIÊN KẾT:
+- Trang chủ: http://127.0.0.1:8000/
+- Admin: http://127.0.0.1:8000/admin/
+- Đăng nhập: http://127.0.0.1:8000/accounts/dang-nhap/
+- AI Chatbot: http://127.0.0.1:8000/ai-chatbox/
+- phpMyAdmin: http://localhost/phpmyadmin/
+
+CÁCH SỬ DỤNG:
+1. Chạy: python tao_du_lieu_mau.py
+2. Chạy: python manage.py runserver
+3. Truy cập: http://127.0.0.1:8000/
+4. Đăng nhập bằng tài khoản trên
+
+LƯU Ý: Đây là dữ liệu mẫu chỉ để test!

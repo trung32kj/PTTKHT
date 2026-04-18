@@ -1,0 +1,22 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "🏥 Phòng khám" [level=1] [ref=e4]
+    - navigation [ref=e5]:
+      - link "Đăng nhập" [ref=e6] [cursor=pointer]:
+        - /url: /accounts/dang-nhap/
+      - link "Đăng ký" [ref=e7] [cursor=pointer]:
+        - /url: /accounts/dang-ky/
+  - generic [ref=e9]:
+    - heading "🔐 Đăng nhập" [level=2] [ref=e10]
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: Tên đăng nhập
+        - textbox [ref=e14]: admin
+      - generic [ref=e15]:
+        - generic [ref=e16]: Mật khẩu
+        - textbox [ref=e17]: admin123
+      - button "Đăng nhập" [ref=e18]
+    - paragraph [ref=e19]:
+      - text: Chưa có tài khoản?
+      - link "Đăng ký ngay" [ref=e20] [cursor=pointer]:
+        - /url: /accounts/dang-ky/
