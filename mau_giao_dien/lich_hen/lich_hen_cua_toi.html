@@ -28,7 +28,22 @@
             {% endif %}
             <td>{{ lich.ngay }}</td>
             <td>{{ lich.gio }}</td>
-            <td>{{ lich.get_trang_thai_display }}</td>
+            <td>
+                <span class="badge 
+                    {% if lich.trang_thai == 'pending' %}badge-warning
+                    {% elif lich.trang_thai == 'approved' %}badge-info
+                    {% elif lich.trang_thai == 'completed' %}badge-success
+                    {% elif lich.trang_thai == 'canceled' %}badge-danger
+                    {% endif %}"
+                    style="padding:4px 10px;border-radius:12px;font-size:13px;
+                    {% if lich.trang_thai == 'pending' %}background:#fff3cd;color:#856404;
+                    {% elif lich.trang_thai == 'approved' %}background:#cce5ff;color:#004085;
+                    {% elif lich.trang_thai == 'completed' %}background:#d4edda;color:#155724;
+                    {% elif lich.trang_thai == 'canceled' %}background:#f8d7da;color:#721c24;
+                    {% endif %}">
+                    {{ lich.get_trang_thai_display }}
+                </span>
+            </td>
             <td>
                 {% if lich.trang_thai == 'pending' %}
                     {% if user.ho_so_bac_si %}
@@ -39,6 +54,9 @@
                     <a href="{% url 'tao_ho_so_benh_an' lich.id %}" class="btn">Ghi hồ sơ</a>
                 {% elif lich.trang_thai == 'completed' %}
                     <a href="{% url 'xem_ho_so_benh_an' lich.ho_so_benh_an.id %}" class="btn">Xem hồ sơ</a>
+                    {% if user.ho_so_benh_nhan %}
+                    <a href="{% url 'danh_gia_bac_si' lich.bac_si.id %}" class="btn" style="background:#f39c12;margin-left:4px;">⭐ Đánh giá</a>
+                    {% endif %}
                 {% endif %}
             </td>
         </tr>

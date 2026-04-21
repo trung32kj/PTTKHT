@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Lỗi hệ thống</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .error-code { font-size: 120px; font-weight: bold; color: #e74c3c; margin: 0; line-height: 1; }
+        .error-title { font-size: 28px; color: var(--text-dark); margin: 20px 0 10px; }
+        .error-desc { color: var(--text-light); font-size: 16px; margin-bottom: 30px; }
+        .error-btn {
+            display: inline-block; padding: 12px 32px; background: var(--primary-blue);
+            color: white; border-radius: 12px; text-decoration: none; font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .error-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,127,196,0.3); }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <p class="error-code">500</p>
+        <h1 class="error-title">⚠️ Lỗi hệ thống</h1>
+        <p class="error-desc">Đã xảy ra lỗi không mong muốn. Đội kỹ thuật đã được thông báo. Vui lòng thử lại sau.</p>
+        <a href="/" class="error-btn">🏠 Về trang chủ</a>
+    </div>
+</body>
+</html>

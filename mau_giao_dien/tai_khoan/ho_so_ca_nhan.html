@@ -6,7 +6,10 @@
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h2>Hồ sơ cá nhân</h2>
-        <a href="{% url 'chinh_sua_ho_so' %}" class="btn">Chỉnh sửa</a>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'chinh_sua_ho_so' %}" class="btn">✏️ Chỉnh sửa</a>
+            <a href="{% url 'doi_mat_khau' %}" class="btn" style="background:#e67e22;">🔒 Đổi mật khẩu</a>
+        </div>
     </div>
     
     <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">

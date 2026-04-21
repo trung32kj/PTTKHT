@@ -41,3 +41,30 @@ class LichHen(models.Model):
     
     def __str__(self):
         return f"{self.benh_nhan.nguoi_dung.get_full_name()} - {self.bac_si.nguoi_dung.get_full_name()} - {self.ngay} {self.gio}"
+
+
+class ThongBao(models.Model):
+    """Thông báo trong hệ thống"""
+    LOAI_CHOICES = [
+        ('lich_hen_moi', 'Lịch hẹn mới'),
+        ('xac_nhan', 'Xác nhận lịch hẹn'),
+        ('huy', 'Hủy lịch hẹn'),
+        ('hoan_thanh', 'Hoàn thành khám'),
+        ('he_thong', 'Hệ thống'),
+    ]
+    
+    nguoi_nhan = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='thong_bao')
+    tieu_de = models.CharField(max_length=200, verbose_name="Tiêu đề")
+    noi_dung = models.TextField(verbose_name="Nội dung")
+    loai = models.CharField(max_length=20, choices=LOAI_CHOICES, default='he_thong')
+    lich_hen = models.ForeignKey(LichHen, on_delete=models.CASCADE, null=True, blank=True, related_name='thong_bao')
+    da_doc = models.BooleanField(default=False, verbose_name="Đã đọc")
+    ngay_tao = models.DateTimeField(auto_now_add=True, verbose_name="Ngày tạo")
+    
+    class Meta:
+        verbose_name = "Thông báo"
+        verbose_name_plural = "Thông báo"
+        ordering = ['-ngay_tao']
+    
+    def __str__(self):
+        return f"{'✓' if self.da_doc else '●'} {self.tieu_de}"

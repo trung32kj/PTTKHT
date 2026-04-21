@@ -31,11 +31,47 @@
             <p class="doctor-specialty">{{ bac_si.chuyen_khoa }}</p>
             <p class="doctor-degree">{{ bac_si.bang_cap }}</p>
             <p class="doctor-fee">{{ bac_si.phi_kham|floatformat:0 }} VNĐ</p>
+            <p class="doctor-rating" style="color:#f39c12;font-size:14px;">
+                {% if bac_si.diem_trung_binh %}
+                    {% for i in "12345" %}{% if forloop.counter <= bac_si.diem_trung_binh %}★{% else %}☆{% endif %}{% endfor %}
+                    <span style="color:var(--text-light);">({{ bac_si.diem_trung_binh|floatformat:1 }})</span>
+                {% else %}
+                    <span style="color:var(--text-light);font-size:13px;">Chưa có đánh giá</span>
+                {% endif %}
+            </p>
             <p class="doctor-description">{{ bac_si.mo_ta|truncatewords:15 }}</p>
             <a href="{% url 'lich_lam_viec_bac_si' bac_si.id %}" class="btn">Xem lịch làm việc</a>
         </div>
         {% endfor %}
     </div>
+
+    <!-- Phân trang -->
+    {% if page_obj.has_other_pages %}
+    <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:2rem;flex-wrap:wrap;">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.specialty %}&specialty={{ request.GET.specialty }}{% endif %}" 
+           class="btn" style="padding:8px 16px;font-size:14px;">← Trước</a>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span style="padding:8px 14px;background:var(--primary-blue);color:white;border-radius:8px;font-weight:bold;">{{ num }}</span>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <a href="?page={{ num }}{% if request.GET.specialty %}&specialty={{ request.GET.specialty }}{% endif %}" 
+               style="padding:8px 14px;border-radius:8px;text-decoration:none;color:var(--text-dark);background:rgba(255,255,255,0.5);border:1px solid var(--glass-border);">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.specialty %}&specialty={{ request.GET.specialty }}{% endif %}" 
+           class="btn" style="padding:8px 16px;font-size:14px;">Tiếp →</a>
+        {% endif %}
+    </div>
+    <p style="text-align:center;color:var(--text-light);margin-top:8px;font-size:13px;">
+        Trang {{ page_obj.number }}/{{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} bác sĩ)
+    </p>
+    {% endif %}
+
     {% else %}
     <div class="empty-state">
         <div class="icon">👨‍⚕️</div>

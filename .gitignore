@@ -1,3 +1,37 @@
+# IDE & Editor
 /.kiro/
 /.vscode/
+/.idea/
+
+# Environment
+.env
+
+# Python
 /venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+
+# Media uploads (optional - uncomment if you don't want to track media)
+# /file_media/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Debug files
+emergency_debug.txt
+
+# Playwright MCP
+/.playwright-mcp/

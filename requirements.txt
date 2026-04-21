@@ -3,3 +3,4 @@ Pillow==12.0.0
 google-generativeai==0.8.3
 pymysql==1.1.2
 mysqlclient==2.2.4
+python-dotenv==1.2.2

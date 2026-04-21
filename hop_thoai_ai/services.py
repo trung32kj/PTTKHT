@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db.models import Avg, Count
 from tai_khoan.models import HoSoBacSi, ChuyenKhoa
 from lich_hen.models import LichLamViec
-from .models import TrieuChungAnalysis, BacSiRecommendation
+from .models import TrieuChungAnalysis, BacSiRecommendation, CachedSymptomAnalysis
 from datetime import datetime, timedelta
 
 
@@ -70,13 +70,104 @@ Lưu ý: Không tự ý chẩn đoán bệnh, chỉ gợi ý nên khám chuyên 
         else:
             return "Tôi đã hiểu. Để tôi giúp bạn tốt hơn, bạn có thể mô tả chi tiết hơn về triệu chứng không?"
     
-    def analyze_symptoms(self, symptoms_text):
-        """Phân tích triệu chứng và đề xuất chuyên khoa - Ưu tiên keyword trước"""
+    @staticmethod
+    def _calculate_similarity(text1, text2):
+        """Tính độ tương tự giữa 2 chuỗi triệu chứng (Jaccard Similarity trên tập từ)"""
+        words1 = set(text1.split())
+        words2 = set(text2.split())
         
-        # Kiểm tra đơn giản trước khi gọi AI
+        if not words1 or not words2:
+            return 0.0
+        
+        intersection = words1 & words2
+        union = words1 | words2
+        
+        return len(intersection) / len(union)
+    
+    def _search_cached_analysis(self, symptoms_text):
+        """Tìm trong DB xem có triệu chứng tương tự đã phân tích chưa.
+        Trả về dict kết quả nếu tìm thấy, None nếu không.
+        """
+        normalized = symptoms_text.lower().strip()
+        
+        # 1. Tìm EXACT match trước (nhanh nhất, dùng index)
+        exact = CachedSymptomAnalysis.objects.filter(
+            trieu_chung_chuan_hoa=normalized
+        ).first()
+        if exact:
+            exact.so_lan_su_dung += 1
+            exact.save(update_fields=['so_lan_su_dung', 'ngay_cap_nhat'])
+            return {
+                "is_valid": True,
+                "chuyen_khoa_de_xuat": exact.chuyen_khoa.ten,
+                "do_tin_cay": exact.do_tin_cay,
+                "phan_tich": exact.phan_tich_chi_tiet,
+                "analysis_method": "cached_db",
+                "cache_hit": True,
+                "so_lan_hoi": exact.so_lan_su_dung
+            }
+        
+        # 2. Tìm SIMILAR match bằng Jaccard Similarity
+        all_cached = CachedSymptomAnalysis.objects.all()
+        best_match = None
+        best_score = 0.0
+        
+        for cached in all_cached:
+            score = self._calculate_similarity(normalized, cached.trieu_chung_chuan_hoa)
+            if score > best_score:
+                best_score = score
+                best_match = cached
+        
+        # Ngưỡng >= 70% mới coi là match
+        if best_match and best_score >= 0.7:
+            best_match.so_lan_su_dung += 1
+            best_match.save(update_fields=['so_lan_su_dung', 'ngay_cap_nhat'])
+            return {
+                "is_valid": True,
+                "chuyen_khoa_de_xuat": best_match.chuyen_khoa.ten,
+                "do_tin_cay": best_match.do_tin_cay,
+                "phan_tich": best_match.phan_tich_chi_tiet,
+                "analysis_method": "cached_db",
+                "cache_hit": True,
+                "similarity_score": round(best_score * 100, 1),
+                "so_lan_hoi": best_match.so_lan_su_dung
+            }
+        
+        return None  # Không tìm thấy match trong cache
+    
+    def _save_to_cache(self, symptoms_text, result):
+        """Lưu kết quả phân tích vào cache DB để tái sử dụng."""
+        try:
+            chuyen_khoa = ChuyenKhoa.objects.filter(
+                ten=result.get('chuyen_khoa_de_xuat', '')
+            ).first()
+            
+            if chuyen_khoa:
+                normalized = symptoms_text.lower().strip()
+                # Kiểm tra không trùng lặp
+                if not CachedSymptomAnalysis.objects.filter(
+                    trieu_chung_chuan_hoa=normalized
+                ).exists():
+                    CachedSymptomAnalysis.objects.create(
+                        trieu_chung=symptoms_text,
+                        trieu_chung_chuan_hoa=normalized,
+                        chuyen_khoa=chuyen_khoa,
+                        do_tin_cay=result.get('do_tin_cay', 0),
+                        phan_tich_chi_tiet=result.get('phan_tich', {}),
+                        phuong_phap=result.get('analysis_method', 'keyword')
+                    )
+        except Exception:
+            pass  # Không để lỗi cache ảnh hưởng flow chính
+
+    def analyze_symptoms(self, symptoms_text):
+        """Phân tích triệu chứng và đề xuất chuyên khoa.
+        Flow: DB Cache → Keyword → Gemini AI
+        """
+        
+        # Kiểm tra đơn giản trước khi phân tích
         symptoms_lower = symptoms_text.lower().strip()
         
-        # Danh sách từ không phải triệu chứng (mở rộng)
+        # Danh sách từ không phải triệu chứng
         non_symptom_words = [
             'hello', 'hi', 'xin chào', 'chào', 'hey', 'yo', 'halo',
             'xin chào bạn', 'chào bạn', 'hi there', 'hey there',
@@ -120,34 +211,43 @@ Lưu ý: Không tự ý chẩn đoán bệnh, chỉ gợi ý nên khám chuyên 
                 "reason": "Input chứa URL hoặc code"
             }
         
+        # ========================================
+        # BƯỚC 1 (MỚI): Tìm trong DB Cache trước
+        # ========================================
+        cached_result = self._search_cached_analysis(symptoms_text)
+        if cached_result:
+            return cached_result
+        
         # Lấy danh sách chuyên khoa hiện có
         chuyen_khoa_list = list(ChuyenKhoa.objects.values_list('ten', flat=True))
         
-        # BƯỚC 1: Thử phân tích bằng keyword trước
-        print(f"🔍 [DEBUG] Trying keyword analysis first for: {symptoms_text}")
+        # ========================================
+        # BƯỚC 2: Keyword Analysis
+        # ========================================
         keyword_result = self._analyze_with_keywords(symptoms_text, chuyen_khoa_list)
         
-        # Kiểm tra xem keyword analysis có tìm thấy match tốt không
-        if keyword_result.get('do_tin_cay', 0) >= 70:  # Nếu confidence >= 70%
-            print(f"✅ [DEBUG] Keyword analysis successful with confidence: {keyword_result.get('do_tin_cay')}%")
+        if keyword_result.get('do_tin_cay', 0) >= 70:
             keyword_result['is_valid'] = True
             keyword_result['analysis_method'] = 'keyword'
+            self._save_to_cache(symptoms_text, keyword_result)
             return keyword_result
         
-        # BƯỚC 2: Nếu keyword không đủ tin cậy, thử AI
+        # ========================================
+        # BƯỚC 3: Gemini AI
+        # ========================================
         if self.use_real_ai:
-            print(f"🤖 [DEBUG] Keyword confidence too low ({keyword_result.get('do_tin_cay')}%), trying AI...")
             ai_result = self._analyze_with_gemini(symptoms_text, chuyen_khoa_list)
-            if ai_result.get('is_valid', True):  # Nếu AI thành công
+            if ai_result.get('is_valid', True):
                 ai_result['analysis_method'] = 'ai'
+                self._save_to_cache(symptoms_text, ai_result)
                 return ai_result
-            else:
-                print(f"❌ [DEBUG] AI analysis failed, falling back to keyword result")
         
-        # BƯỚC 3: Fallback về keyword result (dù confidence thấp)
-        print(f"📝 [DEBUG] Using keyword analysis as final result")
+        # ========================================
+        # BƯỚC 4: Fallback keyword (dù confidence thấp)
+        # ========================================
         keyword_result['is_valid'] = True
         keyword_result['analysis_method'] = 'keyword_fallback'
+        self._save_to_cache(symptoms_text, keyword_result)
         return keyword_result
 
     def _get_possible_diseases(self, specialty, matched_keywords):
@@ -209,10 +309,6 @@ Lưu ý: Không tự ý chẩn đoán bệnh, chỉ gợi ý nên khám chuyên 
     def _analyze_with_gemini(self, symptoms_text, chuyen_khoa_list):
         """Phân tích bằng Gemini"""
         
-        print(f"🔍 [DEBUG] Starting Gemini analysis for: {symptoms_text}")
-        print(f"🔍 [DEBUG] API Key exists: {bool(self.api_key)}")
-        print(f"🔍 [DEBUG] Use real AI: {self.use_real_ai}")
-        
         # Bước 1: Kiểm tra xem input có phải triệu chứng hợp lệ không
         validation_prompt = f"""Bạn là bác sĩ AI. Kiểm tra xem đoạn text sau có phải là MÔ TẢ TRIỆU CHỨNG SỨC KHỎE hợp lệ không:
 
@@ -233,7 +329,6 @@ Tiêu chí hợp lệ:
 CHỈ trả về JSON thuần."""
 
         try:
-            print(f"🔍 [DEBUG] Calling Gemini for validation...")
             # Validate input với timeout
             validation_response = self.model.generate_content(validation_prompt)
             
@@ -246,32 +341,21 @@ CHỈ trả về JSON thuần."""
             validation_text = re.sub(r'\s*```', '', validation_text)
             validation_text = validation_text.strip()
             
-            print(f"🔍 [DEBUG] Cleaned validation response: {validation_text}")
-            
             try:
                 validation_result = json.loads(validation_text)
-            except json.JSONDecodeError as je:
-                print(f"❌ [DEBUG] JSON decode error: {je}")
-                print(f"❌ [DEBUG] Raw text: {repr(validation_text)}")
+            except json.JSONDecodeError:
                 # Fallback về simple validation
                 raise Exception("JSON parsing failed")
             
             # Nếu không phải triệu chứng hợp lệ, trả về lỗi
             if not validation_result.get('is_valid_symptom', False):
-                print(f"❌ [DEBUG] Validation failed: {validation_result.get('reason')}")
                 return {
                     "is_valid": False,
                     "message": validation_result.get('suggestion', 'Vui lòng mô tả triệu chứng cụ thể hơn (ví dụ: đau đầu, sốt, ho, đau bụng...)'),
                     "reason": validation_result.get('reason', 'Input không phải triệu chứng')
                 }
             
-            print(f"✅ [DEBUG] Validation passed, proceeding to analysis...")
-            
-        except Exception as e:
-            print(f"❌ [DEBUG] Validation Error: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            
+        except Exception:
             # Nếu lỗi validation, kiểm tra đơn giản mạnh hơn
             simple_checks = [
                 len(symptoms_text.strip()) < 3,
@@ -288,7 +372,6 @@ CHỈ trả về JSON thuần."""
                 }
             
             # Nếu lỗi API nhưng input có vẻ hợp lệ, fallback về keyword analysis
-            print(f"⚠️ [DEBUG] Falling back to keyword analysis due to API error")
             return self._analyze_with_keywords(symptoms_text, chuyen_khoa_list)
         
         # Bước 2: Phân tích triệu chứng hợp lệ
@@ -334,8 +417,7 @@ CHỈ trả về JSON, không thêm text khác."""
             result['is_valid'] = True
             return result
             
-        except Exception as e:
-            print(f"Gemini Analysis Error: {e}")
+        except Exception:
             return self._analyze_with_keywords(symptoms_text, chuyen_khoa_list)
     
     def _analyze_with_keywords(self, symptoms_text, chuyen_khoa_list):
@@ -462,8 +544,6 @@ CHỈ trả về JSON, không thêm text khác."""
             "luu_y": "Đây chỉ là gợi ý ban đầu dựa trên từ khóa, cần khám trực tiếp để chẩn đoán chính xác"
         }
         
-        print(f"🔍 [KEYWORD] Specialty: {specialty_name}, Score: {max_score}, Confidence: {confidence}%, Matches: {matched_keywords}")
-        
         return {
             "chuyen_khoa_de_xuat": specialty_name,
             "do_tin_cay": confidence,
@@ -533,7 +613,6 @@ class DoctorRecommendationService:
                 'reason': f"Bác sĩ {doctor.chuyen_khoa.ten if doctor.chuyen_khoa else 'đa khoa'} với {available_slots_count} lịch trống"
             })
         
-        print(f"🔍 [DEBUG] Found {len(recommendations)} doctors with available slots for {chuyen_khoa_name}")
         return recommendations
     
     @staticmethod

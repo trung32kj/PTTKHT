@@ -27,35 +27,13 @@ def tao_ho_so_benh_an(request, lich_hen_id):
         # Xử lý toa thuốc (JSON từ frontend)
         toa_thuoc_data = request.POST.get('toa_thuoc_json', '[]')
         
-        # EMERGENCY DEBUG: Log everything for ID 13+ 
-        with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-            f.write(f"\n=== EMERGENCY DEBUG HoSo ID {ho_so.id} ===\n")
-            f.write(f"Time: {ho_so.ngay_tao}\n")
-            f.write(f"All POST keys: {list(request.POST.keys())}\n")
-            for key, value in request.POST.items():
-                f.write(f"  {key}: '{value}'\n")
-            f.write(f"toa_thuoc_json raw: '{toa_thuoc_data}'\n")
-            f.write(f"toa_thuoc_json length: {len(toa_thuoc_data)}\n")
-            f.write(f"toa_thuoc_json == '[]': {toa_thuoc_data == '[]'}\n")
-            f.write(f"toa_thuoc_data.strip(): '{toa_thuoc_data.strip()}'\n")
-        
         if toa_thuoc_data and toa_thuoc_data.strip() and toa_thuoc_data != '[]':
             try:
                 toa_thuoc_list = json.loads(toa_thuoc_data)
                 
-                with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                    f.write(f"✅ JSON parsed successfully: {toa_thuoc_list}\n")
-                    f.write(f"Items count: {len(toa_thuoc_list)}\n")
-                
-                created_count = 0
-                for i, item in enumerate(toa_thuoc_list):
+                for item in toa_thuoc_list:
                     ten_thuoc = item.get('ten_thuoc', '').strip()
                     so_luong_str = str(item.get('so_luong', '')).strip()
-                    
-                    with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                        f.write(f"Item {i+1}: {item}\n")
-                        f.write(f"  ten_thuoc: '{ten_thuoc}'\n")
-                        f.write(f"  so_luong_str: '{so_luong_str}'\n")
                     
                     if ten_thuoc and so_luong_str:
                         try:
@@ -68,39 +46,17 @@ def tao_ho_so_benh_an(request, lich_hen_id):
                                 )
                                 
                                 # Tạo toa thuốc
-                                toa_obj = ToaThuoc.objects.create(
+                                ToaThuoc.objects.create(
                                     ho_so_benh_an=ho_so,
                                     thuoc=thuoc,
                                     so_luong=so_luong,
                                     ghi_chu=item.get('ghi_chu', '').strip()
                                 )
-                                created_count += 1
-                                
-                                with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                                    f.write(f"  ✅ CREATED: {toa_obj} (ID: {toa_obj.id})\n")
-                            else:
-                                with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                                    f.write(f"  ❌ Invalid quantity: {so_luong}\n")
-                        except (ValueError, TypeError) as e:
-                            with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                                f.write(f"  ❌ Error converting quantity: {e}\n")
-                    else:
-                        with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                            f.write(f"  ⏭️ Skipped - missing data\n")
-                
-                with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                    f.write(f"FINAL RESULT: {created_count} prescriptions created\n")
+                        except (ValueError, TypeError):
+                            pass
                             
-            except (json.JSONDecodeError, ValueError, TypeError) as e:
-                with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                    f.write(f"❌ JSON DECODE ERROR: {e}\n")
-        else:
-            with open('emergency_debug.txt', 'a', encoding='utf-8') as f:
-                f.write(f"❌ NO PRESCRIPTION DATA OR EMPTY!\n")
-                f.write(f"  Condition checks:\n")
-                f.write(f"  - toa_thuoc_data: {bool(toa_thuoc_data)}\n")
-                f.write(f"  - toa_thuoc_data.strip(): {bool(toa_thuoc_data.strip()) if toa_thuoc_data else 'N/A'}\n")
-                f.write(f"  - != '[]': {toa_thuoc_data != '[]'}\n")
+            except (json.JSONDecodeError, ValueError, TypeError):
+                pass
         
         lich_hen.trang_thai = 'completed'
         lich_hen.save()

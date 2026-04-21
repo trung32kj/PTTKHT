@@ -1,14 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import LichHen, LichLamViec
+from django.core.paginator import Paginator
+from django.db.models import Avg
+from .models import LichHen, LichLamViec, ThongBao
 from tai_khoan.models import HoSoBacSi, HoSoBenhNhan
 from datetime import date
 
 @login_required
 def danh_sach_bac_si(request):
     chuyen_khoa_id = request.GET.get('specialty')
-    bac_si_list = HoSoBacSi.objects.filter(nguoi_dung__is_active=True)
+    bac_si_list = HoSoBacSi.objects.filter(
+        nguoi_dung__is_active=True
+    ).annotate(
+        diem_trung_binh=Avg('danh_gia__diem_so')
+    ).order_by('-diem_trung_binh')
     
     if chuyen_khoa_id:
         bac_si_list = bac_si_list.filter(chuyen_khoa_id=chuyen_khoa_id)
@@ -16,7 +22,16 @@ def danh_sach_bac_si(request):
     from tai_khoan.models import ChuyenKhoa
     chuyen_khoa_list = ChuyenKhoa.objects.all()
     
-    return render(request, 'lich_hen/danh_sach_bac_si.html', {'bac_si_list': bac_si_list, 'chuyen_khoa_list': chuyen_khoa_list})
+    # Phân trang: 21 bác sĩ mỗi trang
+    paginator = Paginator(bac_si_list, 21)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'lich_hen/danh_sach_bac_si.html', {
+        'bac_si_list': page_obj,
+        'chuyen_khoa_list': chuyen_khoa_list,
+        'page_obj': page_obj,
+    })
 
 @login_required
 def lich_lam_viec_bac_si(request, bac_si_id):
@@ -58,6 +73,15 @@ def dat_lich_kham(request, lich_lam_viec_id):
         lich_lam_viec.con_trong = False
         lich_lam_viec.save()
         
+        # Thông báo cho bác sĩ
+        ThongBao.objects.create(
+            nguoi_nhan=lich_lam_viec.bac_si.nguoi_dung,
+            tieu_de='📅 Lịch hẹn mới',
+            noi_dung=f'Bệnh nhân {request.user.get_full_name()} đã đặt lịch khám ngày {lich_lam_viec.ngay} lúc {lich_lam_viec.gio_bat_dau}.',
+            loai='lich_hen_moi',
+            lich_hen=lich_hen
+        )
+        
         messages.success(request, 'Đặt lịch thành công! Vui lòng chờ bác sĩ xác nhận.')
         return redirect('lich_hen_cua_toi')
     
@@ -88,6 +112,22 @@ def huy_lich_hen(request, lich_hen_id):
     lich_hen.lich_lam_viec.con_trong = True
     lich_hen.lich_lam_viec.save()
     
+    # Thông báo cho bên còn lại
+    if hasattr(request.user, 'ho_so_benh_nhan'):
+        nguoi_nhan = lich_hen.bac_si.nguoi_dung
+        nguoi_huy = f'Bệnh nhân {request.user.get_full_name()}'
+    else:
+        nguoi_nhan = lich_hen.benh_nhan.nguoi_dung
+        nguoi_huy = f'BS. {request.user.get_full_name()}'
+    
+    ThongBao.objects.create(
+        nguoi_nhan=nguoi_nhan,
+        tieu_de='❌ Lịch hẹn bị hủy',
+        noi_dung=f'{nguoi_huy} đã hủy lịch hẹn ngày {lich_hen.ngay} lúc {lich_hen.gio}.',
+        loai='huy',
+        lich_hen=lich_hen
+    )
+    
     messages.success(request, 'Đã hủy lịch hẹn')
     return redirect('lich_hen_cua_toi')
 
@@ -101,6 +141,15 @@ def xac_nhan_lich_hen(request, lich_hen_id):
     
     lich_hen.trang_thai = 'approved'
     lich_hen.save()
+    
+    # Thông báo cho bệnh nhân
+    ThongBao.objects.create(
+        nguoi_nhan=lich_hen.benh_nhan.nguoi_dung,
+        tieu_de='✅ Lịch hẹn đã xác nhận',
+        noi_dung=f'BS. {request.user.get_full_name()} đã xác nhận lịch hẹn ngày {lich_hen.ngay} lúc {lich_hen.gio}.',
+        loai='xac_nhan',
+        lich_hen=lich_hen
+    )
     
     messages.success(request, 'Đã xác nhận lịch hẹn')
     return redirect('lich_hen_cua_toi')
@@ -150,3 +199,17 @@ def lich_lam_viec_cua_toi(request):
     ).order_by('ngay', 'gio_bat_dau')
     
     return render(request, 'lich_hen/lich_lam_viec_cua_toi.html', {'lich_lam_viec': lich_lam_viec})
+
+
+@login_required
+def doc_thong_bao(request):
+    """Đánh dấu tất cả thông báo là đã đọc khi mở dropdown"""
+    if request.method == 'POST':
+        ThongBao.objects.filter(
+            nguoi_nhan=request.user,
+            da_doc=False
+        ).update(da_doc=True)
+        from django.http import JsonResponse
+        return JsonResponse({'status': 'ok'})
+    from django.http import JsonResponse
+    return JsonResponse({'status': 'error'}, status=405)

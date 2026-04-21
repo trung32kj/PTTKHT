@@ -11,4 +11,6 @@ urlpatterns = [
     # URLs cho bác sĩ
     path('dang-ky-lich-lam-viec/', views.dang_ky_lich_lam_viec, name='dang_ky_lich_lam_viec'),
     path('lich-lam-viec-cua-toi/', views.lich_lam_viec_cua_toi, name='lich_lam_viec_cua_toi'),
+    # Thông báo
+    path('doc-thong-bao/', views.doc_thong_bao, name='doc_thong_bao'),
 ]

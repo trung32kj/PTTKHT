@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ChatSession, ChatMessage, TrieuChungAnalysis, BacSiRecommendation
+from .models import ChatSession, ChatMessage, TrieuChungAnalysis, BacSiRecommendation, CachedSymptomAnalysis
 
 
 @admin.register(ChatSession)
@@ -35,3 +35,16 @@ class BacSiRecommendationAdmin(admin.ModelAdmin):
     list_display = ['analysis', 'bac_si', 'thu_tu_uu_tien', 'rating_score']
     list_filter = ['bac_si__chuyen_khoa', 'thu_tu_uu_tien']
     search_fields = ['bac_si__nguoi_dung__username', 'ly_do_goi_y']
+
+
+@admin.register(CachedSymptomAnalysis)
+class CachedSymptomAnalysisAdmin(admin.ModelAdmin):
+    list_display = ['trieu_chung_short', 'chuyen_khoa', 'do_tin_cay', 'phuong_phap', 'so_lan_su_dung', 'ngay_cap_nhat']
+    list_filter = ['chuyen_khoa', 'phuong_phap']
+    search_fields = ['trieu_chung', 'trieu_chung_chuan_hoa']
+    ordering = ['-so_lan_su_dung']
+    readonly_fields = ['ngay_tao', 'ngay_cap_nhat']
+
+    def trieu_chung_short(self, obj):
+        return obj.trieu_chung[:60] + "..." if len(obj.trieu_chung) > 60 else obj.trieu_chung
+    trieu_chung_short.short_description = "Triệu chứng"

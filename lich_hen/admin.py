@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import LichLamViec, LichHen
+from .models import LichLamViec, LichHen, ThongBao
 
 @admin.register(LichLamViec)
 class LichLamViecAdmin(admin.ModelAdmin):
@@ -21,3 +21,15 @@ class LichHenAdmin(admin.ModelAdmin):
     def huy_lich_hen(self, request, queryset):
         queryset.update(trang_thai='canceled')
     huy_lich_hen.short_description = "Hủy lịch hẹn"
+
+
+@admin.register(ThongBao)
+class ThongBaoAdmin(admin.ModelAdmin):
+    list_display = ['tieu_de', 'nguoi_nhan', 'loai', 'da_doc', 'ngay_tao']
+    list_filter = ['loai', 'da_doc', 'ngay_tao']
+    search_fields = ['tieu_de', 'noi_dung', 'nguoi_nhan__username']
+    actions = ['danh_dau_da_doc']
+    
+    def danh_dau_da_doc(self, request, queryset):
+        queryset.update(da_doc=True)
+    danh_dau_da_doc.short_description = "Đánh dấu đã đọc"

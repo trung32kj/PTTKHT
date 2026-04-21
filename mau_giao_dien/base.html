@@ -75,6 +75,28 @@
                 <a href="{% url 'lich_su_kham_benh' %}">Hồ sơ</a>
                 <a href="{% url 'quan_ly_bac_si' %}">Quản lý bác sĩ</a>
                 {% endif %}
+                <div style="position:relative;display:inline-block;">
+                    <a href="#" id="bell-btn" style="position:relative;">
+                        🔔
+                        {% if so_thong_bao > 0 %}
+                        <span style="position:absolute;top:-8px;right:-10px;background:#e74c3c;color:white;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;">{{ so_thong_bao }}</span>
+                        {% endif %}
+                    </a>
+                    <div id="notif-dropdown" style="display:none;position:absolute;right:0;top:35px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);width:300px;z-index:1000;max-height:350px;overflow-y:auto;">
+                        <div style="padding:12px 16px;border-bottom:1px solid #eee;font-weight:bold;">Thông báo</div>
+                        {% if thong_bao_moi %}
+                            {% for tb in thong_bao_moi %}
+                            <div style="padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:13px;">
+                                <strong>{{ tb.tieu_de }}</strong><br>
+                                <span style="color:#666;">{{ tb.noi_dung|truncatewords:12 }}</span><br>
+                                <small style="color:#999;">{{ tb.ngay_tao|timesince }} trước</small>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="padding:20px;text-align:center;color:#999;font-size:13px;">Không có thông báo mới</div>
+                        {% endif %}
+                    </div>
+                </div>
                 <a href="{% url 'ho_so' %}">{{ user.username }}</a>
                 <a href="{% url 'dang_xuat' %}">Đăng xuất</a>
                 {% else %}
@@ -99,7 +121,7 @@
 
     <!-- AI Chatbox Widget cho bệnh nhân -->
     {% if user.is_authenticated and user.ho_so_benh_nhan %}
-    {% include 'ai_chatbox/widget.html' %}
+    {% include 'hop_thoai_ai/widget_chat.html' %}
     {% endif %}
 
     <!-- Chart.js CDN -->
@@ -109,6 +131,45 @@
 
     <!-- Extra JavaScript block for child templates -->
     {% block extra_js %}{% endblock %}
+
+    <script>
+    // Xử lý dropdown thông báo
+    (function() {
+        var bell = document.getElementById('bell-btn');
+        var dropdown = document.getElementById('notif-dropdown');
+        if (!bell || !dropdown) return;
+
+        bell.addEventListener('click', function(e) {
+            e.preventDefault();
+            dropdown.classList.toggle('show');
+
+            // Khi mở dropdown: gửi AJAX đánh dấu đã đọc
+            var badge = bell.querySelector('span');
+            if (badge && dropdown.classList.contains('show')) {
+                fetch('{% url "doc_thong_bao" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).then(function(res) {
+                    if (res.ok) {
+                        badge.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // Đóng dropdown khi click bên ngoài
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#bell-btn') && !e.target.closest('#notif-dropdown')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    })();
+    </script>
+    <style>
+    #notif-dropdown.show { display: block !important; }
+    </style>
 </body>
 
 </html>

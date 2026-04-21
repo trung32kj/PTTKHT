@@ -4,10 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.http import require_http_methods
 import json
 import uuid
-from datetime import datetime
 
 from .models import ChatSession, ChatMessage, TrieuChungAnalysis, BacSiRecommendation
 from .services import OpenAIService, DoctorRecommendationService, AppointmentService

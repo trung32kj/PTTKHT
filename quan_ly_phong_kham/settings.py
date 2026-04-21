@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load biến môi trường từ file .env
+load_dotenv()
 
 # MySQL Configuration - Use PyMySQL as fallback
 try:
@@ -26,13 +31,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--#sljz6encka*_dqh13vq4b!(qfxr5bu^i*8=8pp1dum1__snx'
+# Đọc SECRET_KEY từ biến môi trường
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-fallback-key-for-dev-only')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -73,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'lich_hen.context_processors.thong_bao_context',
             ],
         },
     },
@@ -87,11 +92,11 @@ WSGI_APPLICATION = 'quan_ly_phong_kham.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pttkht',
-        'USER': 'root',
-        'PASSWORD': '',  # Laragon mặc định không có password
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME', 'pttkht'),
+        'USER': os.environ.get('DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
@@ -109,6 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 6},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -117,6 +123,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Giới hạn đăng nhập sai
+MAX_LOGIN_ATTEMPTS = 5
+LOCKOUT_DURATION = 300  # 5 phút (giây)
 
 
 # Internationalization
@@ -157,4 +167,4 @@ SESSION_COOKIE_SECURE = False
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Google Gemini API Configuration
-GEMINI_API_KEY = 'AIzaSyCVIFIyX20YO9O55I1ToHulSYJfxD38UeQ'
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')

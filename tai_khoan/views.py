@@ -37,9 +37,25 @@ def dang_nhap(request):
     if request.method == 'POST':
         ten_dang_nhap = request.POST.get('username')
         mat_khau = request.POST.get('password')
+        
+        # Rate limiting: kiểm tra số lần đăng nhập sai
+        from django.conf import settings
+        from time import time
+        
+        cache_key = f'login_attempts_{ten_dang_nhap}'
+        attempts = request.session.get(cache_key, {'count': 0, 'lockout_until': 0})
+        
+        # Kiểm tra lockout
+        if attempts.get('lockout_until', 0) > time():
+            remaining = int(attempts['lockout_until'] - time())
+            messages.error(request, f'Tài khoản bị tạm khóa. Vui lòng thử lại sau {remaining} giây.')
+            return render(request, 'tai_khoan/dang_nhap.html')
+        
         nguoi_dung = authenticate(request, username=ten_dang_nhap, password=mat_khau)
         
         if nguoi_dung:
+            # Reset attempts khi đăng nhập thành công
+            request.session.pop(cache_key, None)
             login(request, nguoi_dung)
             
             # Phân quyền khi đăng nhập
@@ -53,7 +69,20 @@ def dang_nhap(request):
                 messages.success(request, f'Chào mừng admin {nguoi_dung.get_full_name()}!')
                 return redirect('bang_dieu_khien')
         else:
-            messages.error(request, 'Tên đăng nhập hoặc mật khẩu không đúng')
+            # Tăng số lần đăng nhập sai
+            max_attempts = getattr(settings, 'MAX_LOGIN_ATTEMPTS', 5)
+            lockout_duration = getattr(settings, 'LOCKOUT_DURATION', 300)
+            
+            attempts['count'] = attempts.get('count', 0) + 1
+            if attempts['count'] >= max_attempts:
+                attempts['lockout_until'] = time() + lockout_duration
+                attempts['count'] = 0
+                messages.error(request, f'Quá nhiều lần đăng nhập sai! Tài khoản bị tạm khóa {lockout_duration // 60} phút.')
+            else:
+                remaining = max_attempts - attempts['count']
+                messages.error(request, f'Tên đăng nhập hoặc mật khẩu không đúng (còn {remaining} lần thử)')
+            
+            request.session[cache_key] = attempts
     
     return render(request, 'tai_khoan/dang_nhap.html')
 
@@ -244,3 +273,125 @@ def chinh_sua_ho_so(request):
     
     context = {'profile': ho_so, 'role': role, 'user': nguoi_dung}
     return render(request, 'tai_khoan/chinh_sua_ho_so.html', context)
+
+
+def quen_mat_khau(request):
+    """Đặt lại mật khẩu khi quên"""
+    if request.method == 'POST':
+        ten_dang_nhap = request.POST.get('username')
+        mat_khau_moi = request.POST.get('new_password')
+        xac_nhan = request.POST.get('confirm_password')
+        
+        if mat_khau_moi != xac_nhan:
+            messages.error(request, 'Mật khẩu xác nhận không khớp')
+            return render(request, 'tai_khoan/quen_mat_khau.html')
+        
+        if len(mat_khau_moi) < 6:
+            messages.error(request, 'Mật khẩu phải có ít nhất 6 ký tự')
+            return render(request, 'tai_khoan/quen_mat_khau.html')
+        
+        try:
+            nguoi_dung = User.objects.get(username=ten_dang_nhap)
+            nguoi_dung.set_password(mat_khau_moi)
+            nguoi_dung.save()
+            messages.success(request, 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập.')
+            return redirect('dang_nhap')
+        except User.DoesNotExist:
+            messages.error(request, 'Tên đăng nhập không tồn tại')
+    
+    return render(request, 'tai_khoan/quen_mat_khau.html')
+
+
+@login_required
+def doi_mat_khau(request):
+    """Đổi mật khẩu cho user đã đăng nhập"""
+    if request.method == 'POST':
+        mat_khau_cu = request.POST.get('old_password')
+        mat_khau_moi = request.POST.get('new_password')
+        xac_nhan = request.POST.get('confirm_password')
+        
+        if not request.user.check_password(mat_khau_cu):
+            messages.error(request, 'Mật khẩu hiện tại không đúng')
+            return render(request, 'tai_khoan/doi_mat_khau.html')
+        
+        if mat_khau_moi != xac_nhan:
+            messages.error(request, 'Mật khẩu xác nhận không khớp')
+            return render(request, 'tai_khoan/doi_mat_khau.html')
+        
+        if len(mat_khau_moi) < 6:
+            messages.error(request, 'Mật khẩu mới phải có ít nhất 6 ký tự')
+            return render(request, 'tai_khoan/doi_mat_khau.html')
+        
+        request.user.set_password(mat_khau_moi)
+        request.user.save()
+        
+        # Đăng nhập lại sau khi đổi mật khẩu
+        from django.contrib.auth import update_session_auth_hash
+        update_session_auth_hash(request, request.user)
+        
+        messages.success(request, 'Đổi mật khẩu thành công!')
+        return redirect('ho_so')
+    
+    return render(request, 'tai_khoan/doi_mat_khau.html')
+
+
+@login_required
+def danh_gia_bac_si(request, bac_si_id):
+    """Bệnh nhân đánh giá bác sĩ sau khi khám"""
+    if not hasattr(request.user, 'ho_so_benh_nhan'):
+        messages.error(request, 'Chỉ bệnh nhân mới có thể đánh giá bác sĩ')
+        return redirect('bang_dieu_khien')
+    
+    try:
+        bac_si = HoSoBacSi.objects.get(id=bac_si_id)
+    except HoSoBacSi.DoesNotExist:
+        messages.error(request, 'Bác sĩ không tồn tại')
+        return redirect('bang_dieu_khien')
+    
+    benh_nhan = request.user.ho_so_benh_nhan
+    
+    # Kiểm tra đã có lịch hẹn completed với bác sĩ này chưa
+    from lich_hen.models import LichHen
+    da_kham = LichHen.objects.filter(
+        benh_nhan=benh_nhan,
+        bac_si=bac_si,
+        trang_thai='completed'
+    ).exists()
+    
+    if not da_kham:
+        messages.error(request, 'Bạn cần hoàn thành lịch khám với bác sĩ trước khi đánh giá')
+        return redirect('lich_hen_cua_toi')
+    
+    from .models import DanhGiaBacSi
+    
+    # Kiểm tra đã đánh giá chưa
+    danh_gia_cu = DanhGiaBacSi.objects.filter(bac_si=bac_si, benh_nhan=benh_nhan).first()
+    
+    if request.method == 'POST':
+        diem_so = int(request.POST.get('diem_so', 5))
+        nhan_xet = request.POST.get('nhan_xet', '')
+        
+        if diem_so < 1 or diem_so > 5:
+            diem_so = 5
+        
+        if danh_gia_cu:
+            danh_gia_cu.diem_so = diem_so
+            danh_gia_cu.nhan_xet = nhan_xet
+            danh_gia_cu.save()
+            messages.success(request, 'Cập nhật đánh giá thành công!')
+        else:
+            DanhGiaBacSi.objects.create(
+                bac_si=bac_si,
+                benh_nhan=benh_nhan,
+                diem_so=diem_so,
+                nhan_xet=nhan_xet
+            )
+            messages.success(request, 'Đánh giá bác sĩ thành công!')
+        
+        return redirect('lich_hen_cua_toi')
+    
+    context = {
+        'bac_si': bac_si,
+        'danh_gia_cu': danh_gia_cu,
+    }
+    return render(request, 'tai_khoan/danh_gia_bac_si.html', context)

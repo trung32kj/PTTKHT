@@ -117,5 +117,10 @@ def bang_dieu_khien(request):
     
     return render(request, 'bang_dieu_khien/trang_chu_admin.html', context)
 
-    
-    return render(request, 'bang_dieu_khien/trang_chu_admin.html', context)
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+
+def custom_500(request):
+    return render(request, '500.html', status=500)
