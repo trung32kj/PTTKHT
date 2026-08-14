@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
-from django.conf.urls.static import static
+from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -12,8 +12,11 @@ urlpatterns = [
     path('ai-chatbox/', include('hop_thoai_ai.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# File upload (ảnh đại diện, tài liệu) được phục vụ bởi Django vì Render/WhiteNoise
+# chỉ phục vụ static files thu thập lúc build, không thấy file người dùng tải lên.
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
 
 handler404 = 'bang_dieu_khien.views.custom_404'
 handler500 = 'bang_dieu_khien.views.custom_500'
