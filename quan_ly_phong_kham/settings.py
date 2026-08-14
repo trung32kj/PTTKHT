@@ -153,7 +153,7 @@ MEDIA_ROOT = BASE_DIR / 'file_media'
 
 LOGIN_URL = 'dang_nhap'
 LOGIN_REDIRECT_URL = 'bang_dieu_khien'
-LOGOUT_REDIRECT_URL = 'dang_nhap'
+LOGOUT_REDIRECT_URL = 'landing_page'
 
 # CSRF Settings
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']

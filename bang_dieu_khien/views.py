@@ -6,6 +6,22 @@ from lich_hen.models import LichHen
 from tai_khoan.models import HoSoBenhNhan, HoSoBacSi
 import json
 
+def landing_page(request):
+    """Trang chủ giới thiệu phòng khám"""
+    from tai_khoan.models import HoSoBacSi, ChuyenKhoa
+    
+    # Lấy 4 bác sĩ ngẫu nhiên để hiển thị
+    bac_si_list = HoSoBacSi.objects.select_related('nguoi_dung', 'chuyen_khoa').all()[:4]
+    
+    # Lấy các chuyên khoa
+    chuyen_khoa_list = ChuyenKhoa.objects.all()[:6]
+    
+    context = {
+        'bac_si_list': bac_si_list,
+        'chuyen_khoa_list': chuyen_khoa_list,
+    }
+    return render(request, 'landing_page.html', context)
+
 @login_required
 def bang_dieu_khien(request):
     nguoi_dung = request.user
