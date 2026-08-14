@@ -108,10 +108,12 @@ python manage.py runserver
 3. Điền các biến môi trường được hỏi:
    - `DATABASE_URL`: connection string của Neon
    - `GEMINI_API_KEY`: API key Google Gemini (để trống nếu không dùng chat AI)
+   - `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD`:
+     tài khoản admin sẽ được tạo tự động lúc deploy (gói free không có tab Shell để chạy
+     `createsuperuser` thủ công). Bỏ trống nếu không cần.
    - `DJANGO_SECRET_KEY` được Render tự sinh, `DEBUG` đã đặt `False`
-4. Deploy. `build.sh` sẽ cài dependencies, chạy `collectstatic` và `migrate`.
-5. Tạo tài khoản admin: mở tab **Shell** của service trên Render và chạy
-   `python manage.py createsuperuser`.
+4. Deploy. `build.sh` sẽ cài dependencies, chạy `collectstatic`, `migrate` và tạo admin.
+5. Đăng nhập trang quản trị tại `https://<ten-service>.onrender.com/admin/`.
 
 Lưu ý gói free:
 - Service **ngủ sau 15 phút** không có request, lần truy cập kế tiếp mất ~50 giây để khởi động lại.
