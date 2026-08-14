@@ -100,6 +100,24 @@ python manage.py runserver
 3. Xác nhận lịch hẹn
 4. Sau khi khám, ghi hồ sơ bệnh án
 
+## Deploy lên Render (miễn phí) + Neon Postgres
+
+1. Tạo database trên [Neon](https://neon.tech) (free) và copy connection string dạng
+   `postgresql://user:password@host/dbname?sslmode=require`.
+2. Trên [Render](https://render.com) chọn **New > Blueprint**, trỏ tới repo này (Render đọc `render.yaml`).
+3. Điền các biến môi trường được hỏi:
+   - `DATABASE_URL`: connection string của Neon
+   - `GEMINI_API_KEY`: API key Google Gemini (để trống nếu không dùng chat AI)
+   - `DJANGO_SECRET_KEY` được Render tự sinh, `DEBUG` đã đặt `False`
+4. Deploy. `build.sh` sẽ cài dependencies, chạy `collectstatic` và `migrate`.
+5. Tạo tài khoản admin: mở tab **Shell** của service trên Render và chạy
+   `python manage.py createsuperuser`.
+
+Lưu ý gói free:
+- Service **ngủ sau 15 phút** không có request, lần truy cập kế tiếp mất ~50 giây để khởi động lại.
+- Ổ đĩa **không lưu bền**: file trong `file_media/` (ảnh upload) sẽ mất sau mỗi lần deploy hoặc
+  restart. Nếu cần giữ lại, chuyển sang lưu trữ ngoài (Cloudinary, S3) hoặc gắn Persistent Disk trả phí.
+
 ## Công nghệ sử dụng
 - Django 5.2.8
 - SQLite
