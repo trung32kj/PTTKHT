@@ -145,7 +145,7 @@ def custom_500(request):
 
 @login_required
 def import_data(request):
-    """Import dữ liệu từ file JSON - chỉ admin"""
+    """Import dữ liệu mẫu - chỉ admin"""
     if not request.user.is_superuser:
         return HttpResponse("Chỉ admin mới được import dữ liệu", status=403)
     
@@ -153,9 +153,9 @@ def import_data(request):
         # Chạy migrations
         call_command('migrate', '--noinput')
         
-        # Import dữ liệu
-        call_command('loaddata', 'data.json')
+        # Import dữ liệu mẫu
+        call_command('import_sample_data')
         
-        return HttpResponse("✅ Import dữ liệu thành công! Vui lòng reload trang.")
+        return HttpResponse("✅ Import dữ liệu mẫu thành công! Vui lòng reload trang.")
     except Exception as e:
         return HttpResponse(f"❌ Lỗi import: {str(e)}", status=500)
