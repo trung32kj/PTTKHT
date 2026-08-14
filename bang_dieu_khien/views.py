@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from datetime import date, timedelta
 from lich_hen.models import LichHen
 from tai_khoan.models import HoSoBenhNhan, HoSoBacSi
+from django.core.management import call_command
 import json
 
 def landing_page(request):
@@ -140,3 +141,21 @@ def custom_404(request, exception):
 
 def custom_500(request):
     return render(request, '500.html', status=500)
+
+
+@login_required
+def import_data(request):
+    """Import dữ liệu từ file JSON - chỉ admin"""
+    if not request.user.is_superuser:
+        return HttpResponse("Chỉ admin mới được import dữ liệu", status=403)
+    
+    try:
+        # Chạy migrations
+        call_command('migrate', '--noinput')
+        
+        # Import dữ liệu
+        call_command('loaddata', 'data.json')
+        
+        return HttpResponse("✅ Import dữ liệu thành công! Vui lòng reload trang.")
+    except Exception as e:
+        return HttpResponse(f"❌ Lỗi import: {str(e)}", status=500)
